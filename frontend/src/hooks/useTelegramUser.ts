@@ -31,20 +31,31 @@ declare global {
   }
 }
 
+function getOrCreateFallbackId(): string {
+  const key = 'lexon_user_id';
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = `anon_${crypto.randomUUID()}`;
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+
 export function useTelegramUser() {
   const setUser = useUserStore((s) => s.setUser);
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
+
     if (tg) {
       tg.ready();
       tg.expand();
 
       const user = tg.initDataUnsafe?.user;
-      if (user) {
+      if (user?.id) {
         setUser({
           telegramId: String(user.id),
-          firstName: user.first_name,
+          firstName: user.first_name || 'User',
           lastName: user.last_name || '',
           username: user.username || '',
         });
@@ -52,14 +63,14 @@ export function useTelegramUser() {
       }
     }
 
-    // Dev fallback
-    if (import.meta.env.DEV) {
-      setUser({
-        telegramId: 'dev_user_123',
-        firstName: 'Dev',
-        lastName: 'User',
-        username: 'devuser',
-      });
-    }
+    // Fallback: use a persistent anonymous ID stored in localStorage
+    // This ensures telegramId is never empty, even outside Telegram
+    const fallbackId = getOrCreateFallbackId();
+    setUser({
+      telegramId: fallbackId,
+      firstName: import.meta.env.DEV ? 'Dev User' : 'User',
+      lastName: '',
+      username: import.meta.env.DEV ? 'devuser' : '',
+    });
   }, [setUser]);
 }

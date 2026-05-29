@@ -15,6 +15,9 @@ export interface AnalyzeRequest {
   toolId: string;
   input: string;
   telegramId: string;
+  fileData?: string;
+  fileType?: string;
+  fileName?: string;
 }
 
 export interface AnalyzeResponse {

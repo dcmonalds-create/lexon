@@ -9,9 +9,23 @@ export const TOOLS: Tool[] = [
     icon: 'FileText',
     color: 'bg-emerald-50',
     inputType: 'textarea',
-    inputLabel: 'Paste your contract text',
-    inputPlaceholder: 'Paste the full contract here...',
+    inputLabel: 'Paste your contract text or upload the document',
+    inputPlaceholder: 'Paste the full contract here, or upload a photo/PDF above...',
     price: 1,
+    templates: [
+      {
+        label: '💼 Employment contract',
+        text: 'I am about to sign an employment contract. Country: [YOUR COUNTRY]. Key terms: salary [AMOUNT], notice period [X weeks], non-compete clause included. Please analyze the risks.',
+      },
+      {
+        label: '🏠 Rental agreement',
+        text: 'I am signing a rental lease agreement. Country: [YOUR COUNTRY]. Monthly rent: [AMOUNT]. Deposit: [AMOUNT]. Lease duration: [X months]. Please analyze the risks and red flags.',
+      },
+      {
+        label: '🤝 Freelance contract',
+        text: 'I am signing a freelance services contract as an independent contractor. Country: [YOUR COUNTRY]. Project value: [AMOUNT]. Payment terms: [NET 30/upfront etc]. Please analyze risks.',
+      },
+    ],
   },
   {
     id: 'finebot',
@@ -21,9 +35,23 @@ export const TOOLS: Tool[] = [
     icon: 'AlertTriangle',
     color: 'bg-amber-50',
     inputType: 'form',
-    inputLabel: 'Describe your fine',
+    inputLabel: 'Describe your fine or upload a photo of it',
     inputPlaceholder: 'e.g. Parking fine, €80, issued in Lisbon Portugal on 15 May 2026. I was parked for 10 minutes while unloading...',
     price: 1,
+    templates: [
+      {
+        label: '🚗 Parking ticket',
+        text: 'I received a parking ticket. Amount: [AMOUNT]. City/Country: [LOCATION]. Date: [DATE]. Reason given: [REASON]. Situation: I was [EXPLAIN what you were doing, e.g. unloading, emergency, signage unclear].',
+      },
+      {
+        label: '📷 Speed camera fine',
+        text: 'I received a speed camera fine. Amount: [AMOUNT]. Country: [COUNTRY]. Date: [DATE]. Alleged speed: [X] in a [Y] zone. I believe this is wrong because [REASON, e.g. I was not driving, signs not visible, camera malfunction].',
+      },
+      {
+        label: '📋 Admin penalty',
+        text: 'I received an administrative penalty/fine from a government agency. Amount: [AMOUNT]. Country: [COUNTRY]. Issuing authority: [NAME]. Reason: [REASON]. I want to dispute it because [YOUR GROUNDS].',
+      },
+    ],
   },
   {
     id: 'tenantshield',
@@ -33,9 +61,23 @@ export const TOOLS: Tool[] = [
     icon: 'Home',
     color: 'bg-purple-50',
     inputType: 'textarea',
-    inputLabel: 'Describe your rental issue',
-    inputPlaceholder: 'e.g. My landlord in Berlin refuses to return my €1200 deposit after I moved out 6 weeks ago. The apartment was in perfect condition...',
+    inputLabel: 'Describe your rental issue or upload evidence',
+    inputPlaceholder: 'e.g. My landlord in Berlin refuses to return my €1200 deposit after I moved out 6 weeks ago...',
     price: 1,
+    templates: [
+      {
+        label: '💰 Deposit not returned',
+        text: 'My landlord is refusing to return my deposit. Country/City: [LOCATION]. Deposit amount: [AMOUNT]. Move-out date: [DATE]. Weeks since move-out: [X]. Apartment condition: [good/had minor wear]. Landlord reason: [what they said].',
+      },
+      {
+        label: '🔧 Repairs ignored',
+        text: 'My landlord is refusing to fix a serious problem in my rental. Country/City: [LOCATION]. Issue: [describe problem, e.g. broken heating, water leak, mold]. How long ignored: [X weeks/months]. I have notified them [X times] by [email/text/verbal].',
+      },
+      {
+        label: '🚪 Illegal eviction threat',
+        text: 'My landlord is threatening to evict me or has already changed the locks. Country/City: [LOCATION]. Tenancy duration: [X years/months]. Reason given by landlord: [REASON]. I believe this is illegal because [YOUR REASON]. Rent status: [up to date / X weeks behind].',
+      },
+    ],
   },
   {
     id: 'workershield',
@@ -45,9 +87,23 @@ export const TOOLS: Tool[] = [
     icon: 'Briefcase',
     color: 'bg-blue-50',
     inputType: 'textarea',
-    inputLabel: 'Describe your work situation',
-    inputPlaceholder: 'e.g. I was fired by email with no notice after 3 years at the company in the UK. I was never given a written contract...',
+    inputLabel: 'Describe your work situation or upload relevant documents',
+    inputPlaceholder: 'e.g. I was fired by email with no notice after 3 years at the company in the UK...',
     price: 1,
+    templates: [
+      {
+        label: '🔴 Wrongful termination',
+        text: 'I was fired from my job. Country: [COUNTRY]. Years employed: [X]. Notice given: [none/X days]. Reason given: [REASON]. Written contract: [yes/no]. I believe the termination was unlawful because [YOUR REASON].',
+      },
+      {
+        label: '⏰ Unpaid wages/overtime',
+        text: 'My employer owes me unpaid wages or overtime. Country: [COUNTRY]. Amount owed: approximately [AMOUNT]. Period: [DATE RANGE]. Type: [overtime/withheld salary/bonus]. I have [asked/not asked] HR about this.',
+      },
+      {
+        label: '⚠️ Harassment/discrimination',
+        text: 'I am experiencing harassment or discrimination at work. Country: [COUNTRY]. Type: [sexual harassment/racial discrimination/bullying/etc]. Duration: [X months]. Perpetrator: [colleague/manager/HR]. I have reported it: [yes/no]. Evidence I have: [emails/witnesses/etc].',
+      },
+    ],
   },
   {
     id: 'refundforce',
@@ -57,9 +113,23 @@ export const TOOLS: Tool[] = [
     icon: 'Receipt',
     color: 'bg-red-50',
     inputType: 'textarea',
-    inputLabel: 'Describe your consumer dispute',
-    inputPlaceholder: 'e.g. I bought a laptop from an online store in Italy 3 weeks ago. It arrived broken. They are refusing to refund me...',
+    inputLabel: 'Describe your consumer dispute or upload the receipt/invoice',
+    inputPlaceholder: 'e.g. I bought a laptop from an online store in Italy 3 weeks ago. It arrived broken...',
     price: 1,
+    templates: [
+      {
+        label: '📦 Broken/defective product',
+        text: 'I bought a product that arrived broken or stopped working. Country: [COUNTRY]. Store: [online/physical, name]. Purchase date: [DATE]. Amount: [AMOUNT]. Problem: [DESCRIBE DEFECT]. Seller response: [refused refund/ignored me/offered repair only].',
+      },
+      {
+        label: '🚚 Never delivered',
+        text: 'I paid for a product or service that was never delivered. Country: [COUNTRY]. Seller: [NAME/website]. Amount: [AMOUNT]. Order date: [DATE]. Expected delivery: [DATE]. Seller response: [no response/delayed again/blaming courier].',
+      },
+      {
+        label: '🔄 Subscription cancelled but charged',
+        text: 'A company is charging me after I cancelled a subscription. Country: [COUNTRY]. Company: [NAME]. Cancellation date: [DATE]. Charges since: [AMOUNT] over [X months]. I have proof of cancellation: [yes/no].',
+      },
+    ],
   },
   {
     id: 'tokenlegal',
@@ -69,9 +139,23 @@ export const TOOLS: Tool[] = [
     icon: 'Coins',
     color: 'bg-yellow-50',
     inputType: 'textarea',
-    inputLabel: 'Describe your crypto situation',
-    inputPlaceholder: 'e.g. I am in Romania. I staked ETH in 2024 and earned ~2 ETH in rewards. I also sold some BTC for a profit of ~€5000...',
+    inputLabel: 'Describe your crypto situation or upload a transaction statement',
+    inputPlaceholder: 'e.g. I am in Romania. I staked ETH in 2024 and earned ~2 ETH in rewards...',
     price: 1,
+    templates: [
+      {
+        label: '₿ BTC/ETH trading profits',
+        text: 'I made profits from buying and selling crypto. Country: [COUNTRY]. Tax year: [YEAR]. Coins traded: [BTC/ETH/etc]. Approximate total profit: [AMOUNT in local currency]. I have been trading for [X years]. I have/have not reported this before.',
+      },
+      {
+        label: '🔒 Staking & yield rewards',
+        text: 'I earned crypto through staking or yield farming. Country: [COUNTRY]. Tax year: [YEAR]. Protocol/platform: [NAME]. Estimated rewards received: [AMOUNT in crypto and USD value]. I am unsure if this counts as income or capital gains.',
+      },
+      {
+        label: '🖼️ NFT sales',
+        text: 'I bought and sold NFTs. Country: [COUNTRY]. Tax year: [YEAR]. Number of transactions: approximately [X]. Total proceeds: approximately [AMOUNT]. Total cost basis: approximately [AMOUNT]. Net profit/loss: [AMOUNT].',
+      },
+    ],
   },
   {
     id: 'docwizard',
@@ -81,9 +165,23 @@ export const TOOLS: Tool[] = [
     icon: 'ScrollText',
     color: 'bg-teal-50',
     inputType: 'textarea',
-    inputLabel: 'Describe or paste the form',
-    inputPlaceholder: 'e.g. I have to fill out a Form DS-160 (US visa application). I am confused about the travel history section...',
+    inputLabel: 'Describe the form or upload a photo of it',
+    inputPlaceholder: 'e.g. I have to fill out a Form DS-160 (US visa application)...',
     price: 1,
+    templates: [
+      {
+        label: '✈️ Visa application',
+        text: 'I need help filling out a visa application. Visa type: [tourist/work/student/etc]. Applying for: [COUNTRY]. My nationality: [COUNTRY]. I am confused about: [SPECIFIC SECTION or "the whole form"]. My situation: [briefly describe travel purpose, employment, etc].',
+      },
+      {
+        label: '🏦 Tax return',
+        text: 'I need help with my tax return. Country: [COUNTRY]. Tax year: [YEAR]. Form name: [e.g. Form 1040, Self Assessment, etc]. My situation: [employed/self-employed/both]. I am confused about: [SPECIFIC SECTION, e.g. deductions, foreign income, etc].',
+      },
+      {
+        label: '🛂 Work/residence permit',
+        text: 'I need to fill out a work or residence permit application. Country: [COUNTRY]. Permit type: [work/residence/family reunification]. My current status: [tourist/student/etc]. My employer/sponsor: [yes/no]. I am confused about: [SPECIFIC PART of the form].',
+      },
+    ],
   },
 ];
 

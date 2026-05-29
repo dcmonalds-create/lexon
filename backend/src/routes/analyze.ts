@@ -18,7 +18,7 @@ function checkRateLimit(telegramId: string): boolean {
 }
 
 router.post('/', async (req: Request, res: Response): Promise<void> => {
-  const { toolId, input, telegramId } = req.body as AnalyzeRequest;
+  const { toolId, input, telegramId, fileData, fileType, fileName } = req.body as AnalyzeRequest;
 
   if (!toolId || !input || !telegramId) {
     res.status(400).json({ error: 'Missing required fields: toolId, input, telegramId' });
@@ -35,7 +35,9 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   rateLimitMap.set(telegramId, timestamps);
 
   try {
-    const result = await analyzeWithClaude(toolId, input);
+    const attachment = fileData && fileType ? { fileData, fileType, fileName } : undefined;
+    const result = await analyzeWithClaude(toolId, input, attachment);
+
     const inputSummary = input.slice(0, 200);
     const sessionToken = createSession(telegramId, toolId, inputSummary, result.teaser, result.full);
 

@@ -20,29 +20,76 @@ const PROMPT_MAP: Record<string, (input: string) => string> = {
   docwizard: DOCWIZARD_PROMPT,
 };
 
-export async function analyzeWithClaude(toolId: string, input: string): Promise<AnalysisResult> {
+type SupportedImageType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+const SUPPORTED_IMAGE_TYPES: SupportedImageType[] = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+interface FileAttachment {
+  fileData: string;   // base64
+  fileType: string;   // MIME type
+  fileName?: string;
+}
+
+export async function analyzeWithClaude(
+  toolId: string,
+  input: string,
+  attachment?: FileAttachment
+): Promise<AnalysisResult> {
   const promptFn = PROMPT_MAP[toolId];
   if (!promptFn) {
     throw new Error(`Unknown tool: ${toolId}`);
   }
 
+  const promptText = promptFn(input);
+
+  // Build message content — add file first if present, then the text prompt
+  type ContentBlock =
+    | { type: 'text'; text: string }
+    | { type: 'image'; source: { type: 'base64'; media_type: SupportedImageType; data: string } }
+    | { type: 'document'; source: { type: 'base64'; media_type: 'application/pdf'; data: string } };
+
+  const content: ContentBlock[] = [];
+
+  if (attachment) {
+    const { fileData, fileType } = attachment;
+
+    if (SUPPORTED_IMAGE_TYPES.includes(fileType as SupportedImageType)) {
+      content.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: fileType as SupportedImageType,
+          data: fileData,
+        },
+      });
+    } else if (fileType === 'application/pdf') {
+      content.push({
+        type: 'document',
+        source: {
+          type: 'base64',
+          media_type: 'application/pdf',
+          data: fileData,
+        },
+      });
+    }
+  }
+
+  content.push({ type: 'text', text: promptText });
+
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 4096,
-    messages: [
-      {
-        role: 'user',
-        content: promptFn(input),
-      },
-    ],
+    messages: [{ role: 'user', content }],
   });
 
-  const text = response.content[0];
-  if (text.type !== 'text') {
+  const textBlock = response.content.find((b) => b.type === 'text');
+  if (!textBlock || textBlock.type !== 'text') {
     throw new Error('Unexpected response type from Claude');
   }
 
-  const parsed: AnalysisResult = JSON.parse(text.text);
+  // Strip markdown code fences if Claude wrapped the JSON
+  const raw = textBlock.text.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '');
+
+  const parsed: AnalysisResult = JSON.parse(raw);
   if (!parsed.teaser || !parsed.full) {
     throw new Error('Invalid response structure from Claude');
   }
