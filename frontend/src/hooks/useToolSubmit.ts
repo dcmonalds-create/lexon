@@ -33,8 +33,20 @@ export function useToolSubmit() {
       });
       setResult(res);
     } catch (err: any) {
-      const msg = err.response?.data?.error || 'Analysis failed. Please try again.';
-      setError(msg);
+      const status = err.response?.status;
+      const serverMsg = err.response?.data?.error;
+
+      if (status === 429) {
+        // Rate limit — show the exact server message (includes minutes remaining)
+        setError(`⏳ ${serverMsg || 'Too many requests. Please wait before trying again.'}`);
+      } else if (status === 400 && serverMsg?.includes('PDF')) {
+        // PDF too long
+        setError(`📄 ${serverMsg}`);
+      } else {
+        setError(serverMsg || 'Analysis failed. Please try again.');
+      }
+
+      window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred('error');
     } finally {
       setLoading(false);
     }
