@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm-10_x"]
+
+[phases.install]
+cmds = ["npm i && cd frontend && npm install && cd ../backend && npm install --legacy-peer-deps"]
+
+[phases.build]
+cmds = ["cd frontend && npm run build && cd ../backend && npx tsc"]
+
+[start]
+cmd = "cd backend && node dist/backend/src/index.js"

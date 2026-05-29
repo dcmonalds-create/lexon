@@ -1,9 +1,14 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
 // In compiled output __dirname = dist/backend/src/services/
 // data/ is at backend/data/
-const DB_PATH = path.join(__dirname, '../../../../data/lexon.db');
+const dataDir = path.join(__dirname, '../../../../data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+const DB_PATH = path.join(dataDir, 'lexon.db');
 
 const db = new Database(DB_PATH);
 

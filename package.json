@@ -2,11 +2,12 @@
   "name": "lexon",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
-    "install:all": "cd frontend && npm install && cd ../backend && npm install --legacy-peer-deps",
-    "build:frontend": "cd frontend && npm run build",
-    "build:backend": "cd backend && npx tsc",
-    "build": "npm run build:frontend && npm run build:backend",
+    "postinstall": "cd frontend && npm install && cd ../backend && npm install --legacy-peer-deps",
+    "build": "cd frontend && npm run build && cd ../backend && npx tsc",
     "start": "cd backend && node dist/backend/src/index.js",
     "dev": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm run dev\""
   }
