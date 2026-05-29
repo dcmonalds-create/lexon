@@ -1,0 +1,10 @@
+node_modules/
+dist/
+backend/data/
+.env
+frontend/.env
+backend/.env
+*.db
+*.db-shm
+*.db-wal
+karpathy-CLAUDE.md

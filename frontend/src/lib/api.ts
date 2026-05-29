@@ -1,0 +1,25 @@
+import axios from 'axios';
+import type { AnalyzeRequest, AnalyzeResponse, UnlockRequest, UnlockResponse, HistoryItem } from '../types';
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '/api',
+  timeout: 60000,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+export async function analyze(data: AnalyzeRequest): Promise<AnalyzeResponse> {
+  const res = await api.post<AnalyzeResponse>('/analyze', data);
+  return res.data;
+}
+
+export async function unlock(data: UnlockRequest): Promise<UnlockResponse> {
+  const res = await api.post<UnlockResponse>('/unlock', data);
+  return res.data;
+}
+
+export async function getHistory(telegramId: string): Promise<HistoryItem[]> {
+  const res = await api.get<{ results: HistoryItem[] }>(`/history/${telegramId}`);
+  return res.data.results;
+}
+
+export default api;
