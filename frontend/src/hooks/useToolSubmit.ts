@@ -16,6 +16,7 @@ export function useToolSubmit() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalyzeResponse | null>(null);
   const telegramId = useUserStore((s) => s.telegramId);
+  const languageCode = useUserStore((s) => s.languageCode);
 
   const submit = async ({ toolId, input, fileData, fileType, fileName }: SubmitOptions) => {
     setLoading(true);
@@ -30,6 +31,7 @@ export function useToolSubmit() {
         fileData,
         fileType,
         fileName,
+        languageCode,
       });
       setResult(res);
     } catch (err: any) {

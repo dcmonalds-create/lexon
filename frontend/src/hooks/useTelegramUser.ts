@@ -11,6 +11,7 @@ declare global {
             first_name: string;
             last_name?: string;
             username?: string;
+            language_code?: string;
           };
         };
         ready: () => void;
@@ -58,6 +59,7 @@ export function useTelegramUser() {
           firstName: user.first_name || 'User',
           lastName: user.last_name || '',
           username: user.username || '',
+          languageCode: user.language_code || 'en',
         });
         return;
       }
@@ -71,6 +73,7 @@ export function useTelegramUser() {
       firstName: import.meta.env.DEV ? 'Dev User' : 'User',
       lastName: '',
       username: import.meta.env.DEV ? 'devuser' : '',
+      languageCode: 'en',
     });
   }, [setUser]);
 }

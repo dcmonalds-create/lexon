@@ -11,6 +11,45 @@ import { TOSCANNER_PROMPT } from '../prompts/toscanner';
 
 const client = new Anthropic();
 
+// ─── Language code → full language name ────────────────────────────────────
+
+const LANGUAGE_MAP: Record<string, string> = {
+  ro: 'Romanian',
+  ru: 'Russian',
+  es: 'Spanish',
+  ar: 'Arabic',
+  fr: 'French',
+  de: 'German',
+  pt: 'Portuguese',
+  it: 'Italian',
+  tr: 'Turkish',
+  uk: 'Ukrainian',
+  pl: 'Polish',
+  zh: 'Chinese',
+  nl: 'Dutch',
+  sv: 'Swedish',
+  fi: 'Finnish',
+  no: 'Norwegian',
+  da: 'Danish',
+  cs: 'Czech',
+  sk: 'Slovak',
+  hu: 'Hungarian',
+  el: 'Greek',
+  bg: 'Bulgarian',
+  hr: 'Croatian',
+  sr: 'Serbian',
+  id: 'Indonesian',
+  ms: 'Malay',
+  hi: 'Hindi',
+  bn: 'Bengali',
+  ja: 'Japanese',
+  ko: 'Korean',
+  vi: 'Vietnamese',
+  th: 'Thai',
+  fa: 'Persian',
+  he: 'Hebrew',
+};
+
 const PROMPT_MAP: Record<string, (input: string) => string> = {
   signsafe: SIGNSAFE_PROMPT,
   finebot: FINEBOT_PROMPT,
@@ -34,14 +73,22 @@ interface FileAttachment {
 export async function analyzeWithClaude(
   toolId: string,
   input: string,
-  attachment?: FileAttachment
+  attachment?: FileAttachment,
+  languageCode?: string
 ): Promise<AnalysisResult> {
   const promptFn = PROMPT_MAP[toolId];
   if (!promptFn) {
     throw new Error(`Unknown tool: ${toolId}`);
   }
 
-  const promptText = promptFn(input);
+  // Resolve language and append instruction if not English
+  const normalizedLang = languageCode?.toLowerCase().split('-')[0] ?? 'en';
+  const languageName = LANGUAGE_MAP[normalizedLang];
+  const languageInstruction = languageName
+    ? `\n\nIMPORTANT: Respond entirely in ${languageName}. Every field in the JSON — including the "teaser" and "full" fields — must be written in ${languageName}. Do not use English except for proper nouns or technical terms that have no equivalent.`
+    : '';
+
+  const promptText = promptFn(input) + languageInstruction;
 
   // Build message content — add file first if present, then the text prompt
   type ContentBlock =

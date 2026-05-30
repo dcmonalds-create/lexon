@@ -55,7 +55,7 @@ function checkAndRecordUserLimit(telegramId: string): { allowed: boolean; retryA
 // ─── Route ─────────────────────────────────────────────────────────────────
 
 router.post('/', async (req: Request, res: Response): Promise<void> => {
-  const { toolId, input, telegramId, fileData, fileType, fileName } =
+  const { toolId, input, telegramId, fileData, fileType, fileName, languageCode } =
     req.body as AnalyzeRequest;
 
   // 1. Validate
@@ -107,7 +107,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   // 5. Run Claude analysis
   try {
     const attachment = fileData && fileType ? { fileData, fileType, fileName } : undefined;
-    const result = await analyzeWithClaude(toolId, analysisInput, attachment);
+    const result = await analyzeWithClaude(toolId, analysisInput, attachment, languageCode);
 
     const sessionToken = createSession(telegramId, toolId, inputSummary, result.teaser, result.full);
 

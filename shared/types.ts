@@ -18,6 +18,7 @@ export interface AnalyzeRequest {
   fileData?: string;
   fileType?: string;
   fileName?: string;
+  languageCode?: string; // BCP-47 language code from Telegram user (e.g. 'en', 'ro', 'ru')
 }
 
 export interface AnalyzeResponse {

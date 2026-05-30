@@ -5,7 +5,8 @@ interface UserState {
   firstName: string;
   lastName: string;
   username: string;
-  setUser: (data: { telegramId: string; firstName: string; lastName: string; username: string }) => void;
+  languageCode: string;
+  setUser: (data: { telegramId: string; firstName: string; lastName: string; username: string; languageCode: string }) => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -13,5 +14,6 @@ export const useUserStore = create<UserState>((set) => ({
   firstName: '',
   lastName: '',
   username: '',
+  languageCode: 'en',
   setUser: (data) => set(data),
 }));

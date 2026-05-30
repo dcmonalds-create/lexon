@@ -24,6 +24,7 @@ export interface AnalyzeRequest {
   fileData?: string;   // base64 encoded
   fileType?: string;   // MIME type e.g. image/jpeg, application/pdf
   fileName?: string;
+  languageCode?: string; // BCP-47 language code from Telegram user (e.g. 'en', 'ro', 'ru')
 }
 
 export interface AnalyzeResponse {
