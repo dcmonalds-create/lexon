@@ -111,27 +111,42 @@ export async function verifySolanaUsdcPayment(
     const lexonAta    = await getAssociatedTokenAddress(mintPk, lexonPk);
     const lexonAtaStr = lexonAta.toString();
 
-    console.log('[solanaVerify] expecting USDC credit on ATA:', lexonAtaStr);
+    console.log('[solanaVerify] LEXON_SOLANA_WALLET =', lexonWallet);
+    console.log('[solanaVerify] expected ATA        =', lexonAtaStr);
 
     const preBalances  = tx.meta?.preTokenBalances  ?? [];
     const postBalances = tx.meta?.postTokenBalances ?? [];
     const accountKeys  = tx.transaction.message.accountKeys as any[];
 
+    // Collect all USDC accounts that received funds in this tx
+    const usdcCredits: string[] = [];
     for (const post of postBalances) {
       if (post.mint !== USDC_MINT) continue;
       const acctKey = accountKeys[post.accountIndex]?.pubkey?.toString();
-      if (acctKey !== lexonAtaStr) continue;
-
-      const pre      = preBalances.find((p) => p.accountIndex === post.accountIndex);
-      const preAmt   = BigInt(pre?.uiTokenAmount?.amount  ?? '0');
-      const postAmt  = BigInt(post.uiTokenAmount?.amount  ?? '0');
+      const pre     = preBalances.find((p) => p.accountIndex === post.accountIndex);
+      const preAmt  = BigInt(pre?.uiTokenAmount?.amount ?? '0');
+      const postAmt = BigInt(post.uiTokenAmount?.amount ?? '0');
       const received = postAmt - preAmt;
 
-      console.log(`[solanaVerify] received ${received} micro-USDC on LexOn ATA`);
-      if (received >= 1_000_000n) return { ok: true, reason: 'ok' };
+      console.log(`[solanaVerify] USDC credit → ${acctKey}: +${received} micro-USDC`);
+
+      if (received > 0n) usdcCredits.push(acctKey ?? 'unknown');
+
+      if (acctKey === lexonAtaStr && received >= 1_000_000n) {
+        console.log('[solanaVerify] ✅ Payment verified');
+        return { ok: true, reason: 'ok' };
+      }
     }
 
-    return { ok: false, reason: 'LexOn USDC ATA did not receive ≥ 1 USDC.' };
+    const actualRecipients = usdcCredits.join(', ') || 'none';
+    console.error('[solanaVerify] ATA mismatch — expected:', lexonAtaStr, '| got:', actualRecipients);
+    return {
+      ok: false,
+      reason:
+        `Wallet mismatch — USDC went to: ${actualRecipients.slice(0, 20)}… ` +
+        `but server expected ATA of: ${lexonWallet.slice(0, 8)}…${lexonWallet.slice(-6)}. ` +
+        `Fix LEXON_SOLANA_WALLET in Railway to match VITE_SOLANA_WALLET.`,
+    };
   } catch (err) {
     console.error('[solanaVerify] Unexpected error:', err);
     return { ok: false, reason: 'Verification error. Please try again.' };
