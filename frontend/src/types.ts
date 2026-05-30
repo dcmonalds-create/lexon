@@ -10,7 +10,7 @@ export interface Tool {
   description: string;
   icon: string;
   color: string;
-  inputType: 'textarea' | 'form';
+  inputType: 'textarea' | 'form' | 'url';
   inputLabel: string;
   inputPlaceholder: string;
   price: number;

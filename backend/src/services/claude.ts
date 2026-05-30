@@ -7,6 +7,7 @@ import { WORKERSHIELD_PROMPT } from '../prompts/workershield';
 import { REFUNDFORCE_PROMPT } from '../prompts/refundforce';
 import { TOKENLEGAL_PROMPT } from '../prompts/tokenlegal';
 import { DOCWIZARD_PROMPT } from '../prompts/docwizard';
+import { TOSCANNER_PROMPT } from '../prompts/toscanner';
 
 const client = new Anthropic();
 
@@ -18,6 +19,7 @@ const PROMPT_MAP: Record<string, (input: string) => string> = {
   refundforce: REFUNDFORCE_PROMPT,
   tokenlegal: TOKENLEGAL_PROMPT,
   docwizard: DOCWIZARD_PROMPT,
+  toscanner: TOSCANNER_PROMPT,
 };
 
 type SupportedImageType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';

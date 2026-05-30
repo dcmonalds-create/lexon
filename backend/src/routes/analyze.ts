@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { analyzeWithClaude } from '../services/claude';
 import { createSession } from '../services/payment';
+import { fetchTosContent } from '../services/urlFetcher';
 import { AnalyzeRequest, AnalyzeResponse } from '../../../shared/types';
 
 const router = Router();
@@ -9,16 +10,10 @@ const router = Router();
 
 const MAX_PDF_PAGES = 15;
 
-/**
- * Counts PDF pages by scanning the decoded binary for /Type /Page markers.
- * No extra dependency needed — works for all standard PDF files.
- * Falls back to 1 if the structure can't be parsed (better to allow than block).
- */
 function countPdfPages(base64Data: string): number {
   try {
     const buffer = Buffer.from(base64Data, 'base64');
     const text = buffer.toString('latin1');
-    // Match /Type /Page but NOT /Type /Pages (the parent catalog node)
     const matches = text.match(/\/Type\s*\/Page(?!s)/g);
     return matches ? matches.length : 1;
   } catch {
@@ -29,37 +24,26 @@ function countPdfPages(base64Data: string): number {
 // ─── Per-user rate limit ───────────────────────────────────────────────────
 
 const MAX_REQUESTS_PER_WINDOW = 5;
-const WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const WINDOW_MS = 60 * 60 * 1000;
 
-// Map<telegramId, timestamp[]>
 const userRequestLog = new Map<string, number[]>();
 
-// Purge stale entries every 30 minutes to prevent memory leak
 setInterval(() => {
   const cutoff = Date.now() - WINDOW_MS;
   for (const [id, timestamps] of userRequestLog) {
     const fresh = timestamps.filter((t) => t > cutoff);
-    if (fresh.length === 0) {
-      userRequestLog.delete(id);
-    } else {
-      userRequestLog.set(id, fresh);
-    }
+    if (fresh.length === 0) userRequestLog.delete(id);
+    else userRequestLog.set(id, fresh);
   }
 }, 30 * 60 * 1000);
 
-/**
- * Returns { allowed: true } or { allowed: false, retryAfterMs: number }.
- * Records the request if allowed.
- */
 function checkAndRecordUserLimit(telegramId: string): { allowed: boolean; retryAfterMs?: number } {
   const now = Date.now();
   const cutoff = now - WINDOW_MS;
   const timestamps = (userRequestLog.get(telegramId) || []).filter((t) => t > cutoff);
 
   if (timestamps.length >= MAX_REQUESTS_PER_WINDOW) {
-    // Tell the client when the oldest request will expire
-    const oldestInWindow = Math.min(...timestamps);
-    const retryAfterMs = WINDOW_MS - (now - oldestInWindow);
+    const retryAfterMs = WINDOW_MS - (now - Math.min(...timestamps));
     return { allowed: false, retryAfterMs };
   }
 
@@ -74,15 +58,13 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   const { toolId, input, telegramId, fileData, fileType, fileName } =
     req.body as AnalyzeRequest;
 
-  // 1. Validate required fields
+  // 1. Validate
   if (!toolId || !input || !telegramId) {
-    res.status(400).json({
-      error: 'Missing required fields: toolId, input, telegramId',
-    });
+    res.status(400).json({ error: 'Missing required fields: toolId, input, telegramId' });
     return;
   }
 
-  // 2. Per-user rate limit (5 analyses per hour per telegramId)
+  // 2. Per-user rate limit
   const limitCheck = checkAndRecordUserLimit(telegramId);
   if (!limitCheck.allowed) {
     const minutesLeft = Math.ceil((limitCheck.retryAfterMs ?? WINDOW_MS) / 60_000);
@@ -92,7 +74,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  // 3. PDF page cap — reject before calling Claude to avoid large costs
+  // 3. PDF page cap
   if (fileData && fileType === 'application/pdf') {
     const pageCount = countPdfPages(fileData);
     if (pageCount > MAX_PDF_PAGES) {
@@ -103,21 +85,31 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     }
   }
 
-  // 4. Run analysis
+  // 4. ToS Scanner — fetch URL content before calling Claude
+  let analysisInput = input;
+  let inputSummary = input.slice(0, 200);
+
+  if (toolId === 'toscanner') {
+    try {
+      const fetched = await fetchTosContent(input);
+      analysisInput = fetched.text;
+      inputSummary = fetched.resolvedUrl; // Store the resolved URL as summary
+      console.log(
+        `ToScan: fetched ${fetched.charCount} chars from ${fetched.resolvedUrl}` +
+        (fetched.wasTruncated ? ' (truncated)' : '')
+      );
+    } catch (err: any) {
+      res.status(400).json({ error: err.message || 'Could not fetch the URL. Check it and try again.' });
+      return;
+    }
+  }
+
+  // 5. Run Claude analysis
   try {
-    const attachment = fileData && fileType
-      ? { fileData, fileType, fileName }
-      : undefined;
+    const attachment = fileData && fileType ? { fileData, fileType, fileName } : undefined;
+    const result = await analyzeWithClaude(toolId, analysisInput, attachment);
 
-    const result = await analyzeWithClaude(toolId, input, attachment);
-
-    const sessionToken = createSession(
-      telegramId,
-      toolId,
-      input.slice(0, 200),
-      result.teaser,
-      result.full
-    );
+    const sessionToken = createSession(telegramId, toolId, inputSummary, result.teaser, result.full);
 
     const response: AnalyzeResponse = { teaser: result.teaser, sessionToken };
     res.json(response);

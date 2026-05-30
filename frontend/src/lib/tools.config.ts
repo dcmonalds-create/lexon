@@ -183,6 +183,32 @@ export const TOOLS: Tool[] = [
       },
     ],
   },
+  {
+    id: 'toscanner',
+    name: 'ToScan',
+    tagline: 'Any Terms of Service, exposed',
+    description: 'Paste any website URL and get a trust score, top red flags with exact quotes, what data they collect, rights you waive, and what to do before agreeing.',
+    icon: 'Link',
+    color: 'bg-indigo-50',
+    inputType: 'url',
+    inputLabel: 'Website or Terms of Service URL',
+    inputPlaceholder: 'https://airbnb.com',
+    price: 1,
+    templates: [
+      {
+        label: '🏠 Airbnb',
+        text: 'https://www.airbnb.com/terms',
+      },
+      {
+        label: '🎵 Spotify',
+        text: 'https://www.spotify.com/legal/end-user-agreement/',
+      },
+      {
+        label: '📱 TikTok',
+        text: 'https://www.tiktok.com/legal/page/eea/terms-of-service/en',
+      },
+    ],
+  },
 ];
 
 export function getToolById(id: string): Tool | undefined {
