@@ -27,4 +27,15 @@ export async function followUp(data: FollowUpRequest): Promise<FollowUpResponse>
   return res.data;
 }
 
+export interface SolanaUnlockRequest {
+  sessionToken: string;
+  txSignature: string;
+  userId: string;
+}
+
+export async function solanaUnlock(data: SolanaUnlockRequest): Promise<{ full: string }> {
+  const res = await api.post<{ full: string }>('/solana-unlock', data);
+  return res.data;
+}
+
 export default api;

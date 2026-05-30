@@ -1,5 +1,71 @@
 export const LEXON_WALLET_ADDRESS = import.meta.env.VITE_LEXON_WALLET_ADDRESS || '';
-export const TON_AMOUNT = '1000000000'; // 1 TON in nanotons
+export const TON_AMOUNT = '1000000000'; // 1 TON in nanotons (kept for legacy reference)
+
+// ─── USDT Jetton constants ──────────────────────────────────────────────────
+export const USDT_MASTER_ADDRESS = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
+export const USDT_AMOUNT = 1_000_000n;       // 1 USDT (6 decimals)
+export const JETTON_GAS_AMOUNT = '100000000'; // 0.1 TON gas for the Jetton transfer
+
+/**
+ * Get the user's USDT Jetton wallet address via TONApi.
+ * Returns the raw address string (0:hex) which TonConnect accepts.
+ */
+export async function getJettonWalletAddress(userAddress: string): Promise<string> {
+  const masterEncoded = encodeURIComponent(USDT_MASTER_ADDRESS);
+  const userEncoded = encodeURIComponent(userAddress);
+  const res = await fetch(
+    `https://tonapi.io/v2/accounts/${userEncoded}/jettons/${masterEncoded}`
+  );
+  if (!res.ok) {
+    throw new Error('No USDT found in your wallet. Please add USDT first.');
+  }
+  const data = await res.json();
+  const addr = data?.wallet_address?.address;
+  if (!addr) throw new Error('Could not determine your USDT wallet address.');
+  return addr;
+}
+
+/**
+ * Build a Jetton transfer BOC payload (base64).
+ *
+ * Jetton transfer body layout:
+ *   op             0xf8a7ea5  (32 bits)
+ *   query_id       0          (64 bits)
+ *   amount         USDT_AMOUNT (coins)
+ *   destination    Lexon wallet (address)
+ *   response_dest  Lexon wallet (address)
+ *   custom_payload false      (1 bit)
+ *   forward_ton    1n         (coins — triggers transfer notification)
+ *   forward_ref    true       (1 bit — payload is a ref)
+ *   ref: text comment cell (op 0x00000000 + session token)
+ */
+export async function buildJettonTransferPayload(
+  destinationAddress: string,
+  sessionToken: string
+): Promise<string> {
+  const { beginCell, Address } = await import('@ton/ton');
+
+  // Comment cell: text-comment op + UTF-8 session token
+  const commentCell = beginCell()
+    .storeUint(0, 32)
+    .storeStringTail(sessionToken)
+    .endCell();
+
+  // Jetton transfer body
+  const body = beginCell()
+    .storeUint(0xf8a7ea5, 32)
+    .storeUint(0, 64)
+    .storeCoins(USDT_AMOUNT)
+    .storeAddress(Address.parse(destinationAddress))
+    .storeAddress(Address.parse(destinationAddress))
+    .storeBit(false)
+    .storeCoins(1n)
+    .storeBit(true)
+    .storeRef(commentCell)
+    .endCell();
+
+  return body.toBoc().toString('base64');
+}
 
 /**
  * Encode a text comment as a minimal TON BOC (Bag of Cells).

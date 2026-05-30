@@ -36,8 +36,8 @@ export default function ToolCard({ tool }: { tool: Tool }) {
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-gray-900 text-sm">{tool.name}</h3>
-            <span className="text-[10px] font-medium bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">
-              {tool.price} TON
+            <span className="text-[10px] font-medium bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded-full">
+              {tool.price} USDT
             </span>
           </div>
           <p className="text-xs text-gray-500 mt-0.5">{tool.tagline}</p>

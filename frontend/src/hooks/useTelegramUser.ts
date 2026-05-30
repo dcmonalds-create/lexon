@@ -5,6 +5,7 @@ declare global {
   interface Window {
     Telegram?: {
       WebApp?: {
+        initData?: string;
         initDataUnsafe?: {
           user?: {
             id: number;
@@ -26,6 +27,7 @@ declare global {
           impactOccurred: (style: 'light' | 'medium' | 'heavy') => void;
           notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
         };
+        openLink: (url: string) => void;
         themeParams: Record<string, string>;
       };
     };
@@ -48,7 +50,8 @@ export function useTelegramUser() {
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
 
-    if (tg) {
+    // ── Telegram Mini App ──────────────────────────────────────────────────
+    if (tg?.initData) {
       tg.ready();
       tg.expand();
 
@@ -60,20 +63,51 @@ export function useTelegramUser() {
           lastName: user.last_name || '',
           username: user.username || '',
           languageCode: user.language_code || 'en',
+          isWeb: false,
+          needsSignIn: false,
         });
         return;
       }
     }
 
-    // Fallback: use a persistent anonymous ID stored in localStorage
-    // This ensures telegramId is never empty, even outside Telegram
-    const fallbackId = getOrCreateFallbackId();
-    setUser({
-      telegramId: fallbackId,
-      firstName: import.meta.env.DEV ? 'Dev User' : 'User',
-      lastName: '',
-      username: import.meta.env.DEV ? 'devuser' : '',
-      languageCode: 'en',
-    });
+    // ── Web browser ────────────────────────────────────────────────────────
+    // Try Google OAuth session first, then fall back to anonymous ID
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.ok) {
+          const user = await res.json() as {
+            id: string;
+            firstName: string;
+            lastName: string;
+            email: string;
+          };
+          setUser({
+            telegramId: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            username: '',
+            languageCode: navigator.language?.split('-')[0] || 'en',
+            isWeb: true,
+            needsSignIn: false,
+          });
+          return;
+        }
+      } catch {
+        // Network error — fall through to anonymous
+      }
+
+      // Not authenticated on web → show sign-in prompt
+      const fallbackId = getOrCreateFallbackId();
+      setUser({
+        telegramId: fallbackId,
+        firstName: import.meta.env.DEV ? 'Dev User' : 'Guest',
+        lastName: '',
+        username: import.meta.env.DEV ? 'devuser' : '',
+        languageCode: navigator.language?.split('-')[0] || 'en',
+        isWeb: true,
+        needsSignIn: true,
+      });
+    })();
   }, [setUser]);
 }

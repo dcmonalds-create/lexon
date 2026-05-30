@@ -61,67 +61,65 @@ export function removePendingResult(sessionToken: string): void {
   pendingResults.delete(sessionToken);
 }
 
+/**
+ * Verify a USDT Jetton payment via TONApi events.
+ *
+ * Flow: user → their Jetton wallet → Lexon's Jetton wallet → transfer_notification to Lexon's wallet.
+ * TONApi decodes this into a JettonTransfer action with `comment` = the session token we embedded.
+ *
+ * @param expectedSessionToken  UUID session token embedded as Jetton forward comment
+ */
 export async function verifyTonPayment(
-  txHash: string,
+  _txHash: string,             // BOC from TonConnect — kept for DB storage; not used for verification
   expectedSessionToken: string,
   walletAddress: string
 ): Promise<boolean> {
-  const apiKey = process.env.TONCENTER_API_KEY;
-  const baseUrl = 'https://toncenter.com/api/v2';
+  const apiKey = process.env.TONAPI_KEY;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+  if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
 
   try {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (apiKey) {
-      headers['X-API-Key'] = apiKey;
-    }
-
+    // Fetch the last 50 account events (JettonTransfer events appear here)
     const res = await fetch(
-      `${baseUrl}/getTransactions?address=${walletAddress}&limit=50&archival=true`,
+      `https://tonapi.io/v2/accounts/${encodeURIComponent(walletAddress)}/events?limit=50&subject_only=true`,
       { headers }
     );
 
     if (!res.ok) {
-      console.error('TON Center API error:', res.status);
+      console.error('TONApi events error:', res.status, await res.text());
       return false;
     }
 
-    const data = (await res.json()) as { result?: any[] };
-    const transactions = data.result || [];
+    const data = await res.json() as { events?: any[] };
+    const events = data.events || [];
+    const now = Math.floor(Date.now() / 1000);
 
-    for (const tx of transactions) {
-      const inMsg = tx.in_msg;
-      if (!inMsg) continue;
+    for (const event of events) {
+      // Skip events older than 30 minutes
+      if (now - (event.timestamp ?? 0) > 1800) continue;
 
-      const amount = parseInt(inMsg.value || '0', 10);
-      if (amount < 1_000_000_000) continue;
+      for (const action of event.actions ?? []) {
+        if (action.type !== 'JettonTransfer' || action.status !== 'ok') continue;
 
-      const txTime = tx.utime || 0;
-      const now = Math.floor(Date.now() / 1000);
-      // Extended window: 30 minutes to handle slow blockchain / API lag
-      if (now - txTime > 1800) continue;
+        const jt = action.JettonTransfer;
+        if (!jt) continue;
 
-      const comment = inMsg.message || '';
+        // Amount must be >= 1 USDT (1_000_000 with 6 decimals)
+        const amount = BigInt(jt.amount ?? '0');
+        if (amount < 1_000_000n) continue;
 
-      // Strategy 1: TON Center decoded the cell text for us — direct match
-      if (comment === expectedSessionToken) return true;
-
-      // Strategy 2: TON Center returned raw base64 cell content — decode and
-      // strip the 4-byte text-comment op-code (0x00000000) if present
-      try {
-        const raw = Buffer.from(comment, 'base64');
-        const text =
-          raw.length > 4 && raw.readUInt32BE(0) === 0
-            ? raw.slice(4).toString('utf8')   // strip op-code prefix
-            : raw.toString('utf8');
-        if (text === expectedSessionToken) return true;
-      } catch {}
+        // Comment must match session token exactly
+        if (jt.comment === expectedSessionToken) return true;
+      }
     }
 
     return false;
   } catch (err) {
-    console.error('Payment verification error:', err);
+    console.error('USDT payment verification error:', err);
     return false;
   }
 }
