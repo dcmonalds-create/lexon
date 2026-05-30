@@ -50,3 +50,14 @@ export interface AnalysisResult {
   teaser: string;
   full: string;
 }
+
+export interface FollowUpRequest {
+  fullResult: string;
+  question: string;
+  telegramId: string;
+  languageCode?: string;
+}
+
+export interface FollowUpResponse {
+  answer: string;
+}

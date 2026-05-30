@@ -6,6 +6,7 @@ import rateLimit from 'express-rate-limit';
 import analyzeRouter from './routes/analyze';
 import unlockRouter from './routes/unlock';
 import historyRouter from './routes/history';
+import followUpRouter from './routes/followup';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -62,6 +63,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/analyze', globalLimit, analyzeIpLimit, analyzeRouter);
 app.use('/api/unlock', unlockRouter);
 app.use('/api/history', historyRouter);
+app.use('/api/followup', globalLimit, followUpRouter);
 
 // ─── Frontend static build ────────────────────────────────────────────────
 const frontendDist = path.join(__dirname, '../../../../frontend/dist');

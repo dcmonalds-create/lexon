@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AnalyzeRequest, AnalyzeResponse, UnlockRequest, UnlockResponse, HistoryItem } from '../types';
+import type { AnalyzeRequest, AnalyzeResponse, UnlockRequest, UnlockResponse, HistoryItem, FollowUpRequest, FollowUpResponse } from '../types';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -20,6 +20,11 @@ export async function unlock(data: UnlockRequest): Promise<UnlockResponse> {
 export async function getHistory(telegramId: string): Promise<HistoryItem[]> {
   const res = await api.get<{ results: HistoryItem[] }>(`/history/${telegramId}`);
   return res.data.results;
+}
+
+export async function followUp(data: FollowUpRequest): Promise<FollowUpResponse> {
+  const res = await api.post<FollowUpResponse>('/followup', data);
+  return res.data;
 }
 
 export default api;

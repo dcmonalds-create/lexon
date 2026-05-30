@@ -5,6 +5,7 @@ import { getToolById } from '../../lib/tools.config';
 import { useToolSubmit } from '../../hooks/useToolSubmit';
 import Paywall from '../../components/Paywall';
 import ResultCard from '../../components/ResultCard';
+import FollowUp from '../../components/FollowUp';
 import Loader from '../../components/Loader';
 
 const MAX_FILE_SIZE_MB = 10;
@@ -165,6 +166,7 @@ export default function ToolPage() {
       {fullResult ? (
         <div>
           <ResultCard toolName={tool.name} fullResult={fullResult} resultLabel={resultLabel} />
+          <FollowUp fullResult={fullResult} />
           <button
             onClick={handleNewAnalysis}
             className="w-full mt-4 py-3 px-6 rounded-2xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
