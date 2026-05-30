@@ -151,13 +151,10 @@ export function usePhantomPayment() {
         setError('Transaction failed on Solana. Make sure you have USDC and enough SOL for fees.');
       } else if (msg.includes('not configured')) {
         setError('Payment setup error. Please contact support.');
-      } else if (err.response?.status === 402) {
-        // Backend couldn't verify yet — the tx was sent but indexing is slow
-        setError('Transaction sent! Verification is taking longer than usual. Please wait 30 seconds and try again.');
       } else if (err.response?.data?.error) {
+        // Show the exact backend reason (includes verification failure details)
         setError(err.response.data.error);
       } else {
-        // Show the real error in the UI so it's easier to debug
         setError(`Payment failed: ${msg || 'unknown error'}. Please try again.`);
       }
       return null;

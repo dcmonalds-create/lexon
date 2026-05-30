@@ -30,11 +30,10 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    const isValid = await verifySolanaUsdcPayment(txSignature, sessionToken);
-    if (!isValid) {
-      res.status(402).json({
-        error: 'Payment not verified. Please wait for on-chain confirmation and try again.',
-      });
+    const { ok, reason } = await verifySolanaUsdcPayment(txSignature, sessionToken);
+    if (!ok) {
+      console.error('[solana-unlock] verification failed:', reason);
+      res.status(402).json({ error: `Payment verification failed: ${reason}` });
       return;
     }
 
