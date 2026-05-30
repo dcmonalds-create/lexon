@@ -1,15 +1,44 @@
+import { useState } from 'react';
 import { useUserStore } from '../store/userStore';
 import { useWalletStore } from '../store/walletStore';
 import { useHistoryStore } from '../store/historyStore';
+import { usePhantomStore } from '../store/phantomStore';
 import { useTonConnectUI } from '@tonconnect/ui-react';
-import { User, Wallet, BarChart3, Globe, ExternalLink } from 'lucide-react';
+import { User, Wallet, BarChart3, Globe, ExternalLink, LogOut } from 'lucide-react';
 
 const WEB_URL = import.meta.env.VITE_WEB_URL || 'https://web-production-049de.up.railway.app';
 const isTelegram = Boolean(window.Telegram?.WebApp?.initData);
 
 export default function Profile() {
-  const { firstName, lastName, username, telegramId } = useUserStore();
+  const { firstName, lastName, username, telegramId, setUser } = useUserStore();
   const { connected, address } = useWalletStore();
+  const setPhantomConnected = usePhantomStore((s) => s.setConnected);
+  const [signingOut, setSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch {
+      // ignore network errors — sign out locally regardless
+    }
+    // Disconnect Phantom wallet
+    try {
+      await (window as any).phantom?.solana?.disconnect();
+    } catch { /* ignore */ }
+    setPhantomConnected(false, '');
+    // Clear user state — triggers WebSignIn overlay
+    setUser({
+      telegramId: '',
+      firstName: '',
+      lastName: '',
+      username: '',
+      languageCode: 'en',
+      isWeb: true,
+      needsSignIn: true,
+    });
+    setSigningOut(false);
+  };
   const items = useHistoryStore((s) => s.items);
   const [tonConnectUI] = useTonConnectUI();
 
@@ -103,6 +132,20 @@ export default function Profile() {
           >
             <ExternalLink className="w-4 h-4" />
             Open LexOn on the web
+          </button>
+        </div>
+      )}
+
+      {/* ── Sign Out (web only) ── */}
+      {!isTelegram && (
+        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <button
+            onClick={handleSignOut}
+            disabled={signingOut}
+            className="w-full flex items-center justify-center gap-2 text-sm font-medium text-red-500 hover:text-red-600 disabled:opacity-50 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            {signingOut ? 'Signing out…' : 'Sign Out'}
           </button>
         </div>
       )}
