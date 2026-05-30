@@ -62,7 +62,7 @@ export default function Paywall({
   const isPayingPhantom = !isTelegram && paying;
 
   if (isPayingTon || isPayingPhantom) {
-    return <Loader text="Processing payment…" />;
+    return <Loader text="Confirming on Solana — please wait…" />;
   }
 
   return (
