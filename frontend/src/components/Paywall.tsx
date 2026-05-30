@@ -1,6 +1,7 @@
 import { Lock } from 'lucide-react';
 import { usePayment } from '../hooks/usePayment';
 import { usePhantomPayment } from '../hooks/usePhantomPayment';
+import { usePhantomWallet } from '../hooks/usePhantomWallet';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import Loader from './Loader';
 
@@ -12,8 +13,23 @@ interface PaywallProps {
   lockedLabel?: string;
 }
 
-// Detect if running inside the Telegram Mini App
 const isTelegram = Boolean(window.Telegram?.WebApp?.initData);
+
+const PhantomIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 128 128" fill="none">
+    <rect width="128" height="128" rx="64" fill="white" fillOpacity="0.2" />
+    <path
+      d="M110.584 64.914c0 24.595-20.008 44.514-44.713 44.514-24.705 0-44.713-19.919-44.713-44.514 0-24.594 20.008-44.514 44.713-44.514 24.705 0 44.713 19.92 44.713 44.514z"
+      fill="white"
+    />
+    <path
+      d="M88.5 64.5c0 13.255-10.745 24-24 24s-24-10.745-24-24 10.745-24 24-24"
+      stroke="#AB9FF2"
+      strokeWidth="8"
+      strokeLinecap="round"
+    />
+  </svg>
+);
 
 export default function Paywall({
   teaser,
@@ -22,38 +38,43 @@ export default function Paywall({
   onUnlocked,
   lockedLabel = 'Full analysis locked',
 }: PaywallProps) {
-  // Always call both hooks (Rules of Hooks) — only one is used per platform
+  // Always call all hooks — Rules of Hooks
   const tonPayment = usePayment();
-  const phantomPayment = usePhantomPayment();
+  const { pay, paying, error } = usePhantomPayment();
+  const { connected: phantomConnected, connect: connectPhantom, isInstalled } = usePhantomWallet();
   const [tonConnectUI] = useTonConnectUI();
+  const tonConnected = tonConnectUI.connected;
 
-  const { pay, paying, error } = isTelegram ? tonPayment : phantomPayment;
-  const isConnected = tonConnectUI.connected;
-
-  const handlePay = async () => {
-    if (isTelegram && !isConnected) {
-      tonConnectUI.openModal();
-      return;
-    }
-    const fullResult = await pay(sessionToken);
-    if (fullResult) {
-      onUnlocked(fullResult);
-    }
+  // Telegram payment handler
+  const handleTonPay = async () => {
+    if (!tonConnected) { tonConnectUI.openModal(); return; }
+    const full = await tonPayment.pay(sessionToken);
+    if (full) onUnlocked(full);
   };
 
-  if (paying) {
+  // Web payment handler — only called when Phantom is already connected
+  const handlePhantomPay = async () => {
+    const full = await pay(sessionToken);
+    if (full) onUnlocked(full);
+  };
+
+  const isPayingTon = isTelegram && tonPayment.paying;
+  const isPayingPhantom = !isTelegram && paying;
+
+  if (isPayingTon || isPayingPhantom) {
     return <Loader text="Processing payment…" />;
   }
 
   return (
     <div className="mt-6 space-y-4">
-      {/* Teaser preview */}
+
+      {/* Teaser */}
       <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
         <h4 className="text-sm font-semibold text-gray-900 mb-2">Preview — {toolName}</h4>
         <p className="text-sm text-gray-600 leading-relaxed">{teaser}</p>
       </div>
 
-      {/* Blurred content placeholder */}
+      {/* Blurred placeholder */}
       <div className="relative bg-white rounded-2xl p-5 border border-gray-100 shadow-sm overflow-hidden">
         <div className="blur-sm select-none pointer-events-none">
           <div className="h-4 bg-gray-200 rounded w-3/4 mb-3" />
@@ -73,50 +94,66 @@ export default function Paywall({
         </div>
       </div>
 
-      {/* Payment button */}
-      {isTelegram ? (
-        /* ── TON path: TonConnect USDT ── */
+      {/* ── Telegram: TonConnect USDT ── */}
+      {isTelegram && (
         <button
-          onClick={handlePay}
+          onClick={handleTonPay}
           className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold py-3.5 px-6 rounded-2xl transition-colors text-sm flex items-center justify-center gap-2"
         >
-          {isConnected ? (
-            <>
-              {/* Tether logo */}
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M13.5 9.5V7H17V5H7v2h3.5v2.5C6.36 9.92 3 11.3 3 13s3.36 3.08 7.5 3.48V21h3v-4.52C17.64 16.08 21 14.7 21 13s-3.36-3.08-7.5-3.5zM12 15c-3.87 0-7-1.12-7-2.5S8.13 10 12 10s7 1.12 7 2.5S15.87 15 12 15z" />
-              </svg>
-              Unlock for 1 USDT
-            </>
-          ) : (
-            <>Connect Wallet to Unlock</>
-          )}
-        </button>
-      ) : (
-        /* ── Web path: Phantom USDC ── */
-        <button
-          onClick={handlePay}
-          className="w-full bg-[#AB9FF2] hover:bg-[#9B8EE8] active:bg-[#8B7ED8] text-white font-semibold py-3.5 px-6 rounded-2xl transition-colors text-sm flex items-center justify-center gap-2"
-        >
-          {/* Phantom ghost logo */}
-          <svg className="w-5 h-5" viewBox="0 0 128 128" fill="none">
-            <rect width="128" height="128" rx="64" fill="#AB9FF2" />
-            <path
-              d="M110.584 64.9142C110.584 89.5089 90.576 109.428 65.8711 109.428C41.1662 109.428 21.1582 89.5089 21.1582 64.9142C21.1582 40.3195 41.1662 20.4 65.8711 20.4C90.576 20.4 110.584 40.3195 110.584 64.9142Z"
-              fill="white"
-            />
-            <path
-              d="M88.5 64.5C88.5 77.7548 77.7548 88.5 64.5 88.5C51.2452 88.5 40.5 77.7548 40.5 64.5C40.5 51.2452 51.2452 40.5 64.5 40.5"
-              stroke="#AB9FF2"
-              strokeWidth="8"
-              strokeLinecap="round"
-            />
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13.5 9.5V7H17V5H7v2h3.5v2.5C6.36 9.92 3 11.3 3 13s3.36 3.08 7.5 3.48V21h3v-4.52C17.64 16.08 21 14.7 21 13s-3.36-3.08-7.5-3.5zM12 15c-3.87 0-7-1.12-7-2.5S8.13 10 12 10s7 1.12 7 2.5S15.87 15 12 15z" />
           </svg>
-          Unlock with Phantom (1 USDC)
+          {tonConnected ? 'Unlock for 1 USDT' : 'Connect Wallet to Unlock'}
         </button>
       )}
 
-      {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+      {/* ── Web: Phantom USDC — 3 states ── */}
+      {!isTelegram && (
+        <>
+          {/* State 1: Phantom not installed */}
+          {!isInstalled && (
+            <a
+              href="https://phantom.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-[#AB9FF2] hover:bg-[#9B8EE8] text-white font-semibold py-3.5 px-6 rounded-2xl transition-colors text-sm flex items-center justify-center gap-2"
+            >
+              <PhantomIcon className="w-5 h-5" />
+              Install Phantom Wallet
+            </a>
+          )}
+
+          {/* State 2: Installed but not connected */}
+          {isInstalled && !phantomConnected && (
+            <button
+              onClick={connectPhantom}
+              className="w-full bg-[#AB9FF2] hover:bg-[#9B8EE8] active:bg-[#8B7ED8] text-white font-semibold py-3.5 px-6 rounded-2xl transition-colors text-sm flex items-center justify-center gap-2"
+            >
+              <PhantomIcon className="w-5 h-5" />
+              Connect Phantom Wallet
+            </button>
+          )}
+
+          {/* State 3: Connected — show Pay button */}
+          {isInstalled && phantomConnected && (
+            <button
+              onClick={handlePhantomPay}
+              className="w-full bg-[#AB9FF2] hover:bg-[#9B8EE8] active:bg-[#8B7ED8] text-white font-semibold py-3.5 px-6 rounded-2xl transition-colors text-sm flex items-center justify-center gap-2"
+            >
+              <PhantomIcon className="w-5 h-5" />
+              Pay 1 USDC to Unlock
+            </button>
+          )}
+        </>
+      )}
+
+      {/* Errors */}
+      {isTelegram && tonPayment.error && (
+        <p className="text-xs text-red-500 text-center">{tonPayment.error}</p>
+      )}
+      {!isTelegram && error && (
+        <p className="text-xs text-red-500 text-center">{error}</p>
+      )}
     </div>
   );
 }

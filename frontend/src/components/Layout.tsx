@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Scale, Clock, User } from 'lucide-react';
 import WalletButton from './WalletButton';
+import PhantomButton from './PhantomButton';
 import WebSignIn from './WebSignIn';
 import { useUserStore } from '../store/userStore';
 
@@ -28,8 +29,8 @@ export default function Layout() {
             <Scale className="w-5 h-5" />
             <span className="font-bold text-lg tracking-tight">LexOn</span>
           </button>
-          {/* Only show TonConnect button inside Telegram */}
-          {isTelegram && <WalletButton />}
+          {/* Telegram → TonConnect button; Web → Phantom button */}
+          {isTelegram ? <WalletButton /> : <PhantomButton />}
         </div>
       </header>
 
