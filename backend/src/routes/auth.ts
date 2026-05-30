@@ -72,8 +72,15 @@ router.get(
   '/google/callback',
   requireGoogleConfig,
   passport.authenticate('google', { failureRedirect: '/?auth=failed' }),
-  (_req, res) => {
-    res.redirect('/?auth=success');
+  (req, res) => {
+    // Explicitly flush the session to the store BEFORE redirecting.
+    // Without this, express-session may not finish writing when the browser
+    // immediately follows the redirect and calls /api/auth/me — resulting in
+    // req.isAuthenticated() returning false even though login succeeded.
+    req.session.save((err) => {
+      if (err) console.error('Session save error after Google OAuth:', err);
+      res.redirect('/?auth=success');
+    });
   }
 );
 

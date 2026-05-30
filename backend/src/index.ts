@@ -30,6 +30,7 @@ app.use(
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
+      sameSite: 'lax',   // required for OAuth redirect cookies to survive cross-origin hops
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
   })
