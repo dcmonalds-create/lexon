@@ -8,6 +8,7 @@ import { REFUNDFORCE_PROMPT } from '../prompts/refundforce';
 import { TOKENLEGAL_PROMPT } from '../prompts/tokenlegal';
 import { DOCWIZARD_PROMPT } from '../prompts/docwizard';
 import { TOSCANNER_PROMPT } from '../prompts/toscanner';
+import { LEXDRAFT_PROMPT } from '../prompts/lexdraft';
 
 const client = new Anthropic();
 
@@ -59,6 +60,7 @@ const PROMPT_MAP: Record<string, (input: string) => string> = {
   tokenlegal: TOKENLEGAL_PROMPT,
   docwizard: DOCWIZARD_PROMPT,
   toscanner: TOSCANNER_PROMPT,
+  lexdraft: LEXDRAFT_PROMPT,
 };
 
 type SupportedImageType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';

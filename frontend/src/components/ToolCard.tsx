@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  FileText, AlertTriangle, Home, Briefcase, Receipt, Coins, ScrollText, Link,
+  FileText, AlertTriangle, Home, Briefcase, Receipt, Coins, ScrollText, Link, PenLine,
 } from 'lucide-react';
 import type { Tool } from '../types';
 
@@ -13,6 +13,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Coins,
   ScrollText,
   Link,
+  PenLine,
 };
 
 export default function ToolCard({ tool }: { tool: Tool }) {

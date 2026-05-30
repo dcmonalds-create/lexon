@@ -184,6 +184,32 @@ export const TOOLS: Tool[] = [
     ],
   },
   {
+    id: 'lexdraft',
+    name: 'LexDraft',
+    tagline: 'AI document generator',
+    description: 'Describe any legal document you need and get a complete, lawyer-quality draft in seconds. NDAs, freelance contracts, demand letters, consent forms — all tailored to your jurisdiction.',
+    icon: 'PenLine',
+    color: 'bg-violet-50',
+    inputType: 'textarea',
+    inputLabel: 'Describe the document you need',
+    inputPlaceholder: 'e.g. NDA between me and a freelancer, Romanian law, 6-month confidentiality, covers software development work for my startup...',
+    price: 1,
+    templates: [
+      {
+        label: '🤫 NDA',
+        text: 'Non-Disclosure Agreement between me ([YOUR NAME / COMPANY]) and a freelancer ([FREELANCER NAME]). Jurisdiction: [COUNTRY]. Confidentiality period: [X months/years]. Project: [describe what information to protect, e.g. software source code, business strategy, client data].',
+      },
+      {
+        label: '💻 Freelance contract',
+        text: 'Freelance services contract. Client: [YOUR NAME / COMPANY]. Freelancer: [FREELANCER NAME]. Country: [COUNTRY]. Services: [describe work, e.g. web development, logo design]. Total fee: [AMOUNT]. Payment: [e.g. 50% upfront, 50% on delivery]. Deadline: [DATE or timeframe]. IP ownership goes to the client.',
+      },
+      {
+        label: '✉️ Demand letter',
+        text: 'Formal demand letter from [YOUR NAME] to [RECIPIENT / COMPANY]. Country: [COUNTRY]. Dispute: [describe the issue, e.g. unpaid invoice of €X, defective product, breach of contract]. Amount or remedy demanded: [X]. Deadline to respond: [e.g. 14 days]. Consequence if ignored: [e.g. legal proceedings, small claims court].',
+      },
+    ],
+  },
+  {
     id: 'toscanner',
     name: 'ToScan',
     tagline: 'Any Terms of Service, exposed',

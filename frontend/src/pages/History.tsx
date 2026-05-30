@@ -38,12 +38,14 @@ export default function History() {
       <div className="space-y-4">
         {items.map((item) => {
           const tool = getToolById(item.tool_id);
+          const resultLabel = item.tool_id === 'lexdraft' ? 'Generated Document' : 'Full Analysis';
           return (
             <ResultCard
               key={item.id}
               toolName={tool?.name || item.tool_id}
               fullResult={item.full_result}
               timestamp={item.created_at}
+              resultLabel={resultLabel}
             />
           );
         })}

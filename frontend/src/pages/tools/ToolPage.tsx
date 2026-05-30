@@ -46,6 +46,16 @@ export default function ToolPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isUrlMode = tool?.inputType === 'url';
+  const isDocMode = tool?.id === 'lexdraft';
+
+  const newAnalysisLabel = isUrlMode
+    ? 'Scan Another Site'
+    : isDocMode
+    ? 'Draft Another Document'
+    : 'New Analysis';
+
+  const resultLabel = isDocMode ? 'Generated Document' : 'Full Analysis';
+  const lockedLabel = isDocMode ? 'Full document locked' : 'Full analysis locked';
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
@@ -154,12 +164,12 @@ export default function ToolPage() {
 
       {fullResult ? (
         <div>
-          <ResultCard toolName={tool.name} fullResult={fullResult} />
+          <ResultCard toolName={tool.name} fullResult={fullResult} resultLabel={resultLabel} />
           <button
             onClick={handleNewAnalysis}
             className="w-full mt-4 py-3 px-6 rounded-2xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            Scan Another Site
+            {newAnalysisLabel}
           </button>
         </div>
       ) : result ? (
@@ -168,6 +178,7 @@ export default function ToolPage() {
           sessionToken={result.sessionToken}
           toolName={tool.name}
           onUnlocked={setFullResult}
+          lockedLabel={lockedLabel}
         />
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -310,7 +321,7 @@ export default function ToolPage() {
           {error && <p className="text-xs text-red-500">{error}</p>}
 
           {loading ? (
-            <Loader text={isUrlMode ? 'Fetching & analyzing terms…' : 'AI is analyzing your case...'} />
+            <Loader text={isUrlMode ? 'Fetching & analyzing terms…' : isDocMode ? 'Drafting your document…' : 'AI is analyzing your case...'} />
           ) : (
             <button
               type="submit"
@@ -321,7 +332,7 @@ export default function ToolPage() {
                   : 'bg-[#1D4035] hover:bg-[#164030]'
               }`}
             >
-              {isUrlMode ? 'Scan Terms of Service' : 'Analyze'}
+              {isUrlMode ? 'Scan Terms of Service' : isDocMode ? 'Generate Document' : 'Analyze'}
             </button>
           )}
         </form>

@@ -8,9 +8,10 @@ interface PaywallProps {
   sessionToken: string;
   toolName: string;
   onUnlocked: (fullResult: string) => void;
+  lockedLabel?: string;
 }
 
-export default function Paywall({ teaser, sessionToken, toolName, onUnlocked }: PaywallProps) {
+export default function Paywall({ teaser, sessionToken, toolName, onUnlocked, lockedLabel = 'Full analysis locked' }: PaywallProps) {
   const { pay, paying, error } = usePayment();
   const [tonConnectUI] = useTonConnectUI();
   const isConnected = tonConnectUI.connected;
@@ -53,7 +54,7 @@ export default function Paywall({ teaser, sessionToken, toolName, onUnlocked }: 
           <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
             <Lock className="w-5 h-5 text-gray-400" />
           </div>
-          <p className="text-xs text-gray-500">Full analysis locked</p>
+          <p className="text-xs text-gray-500">{lockedLabel}</p>
         </div>
       </div>
 

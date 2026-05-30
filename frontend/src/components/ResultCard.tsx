@@ -6,9 +6,10 @@ interface ResultCardProps {
   toolName: string;
   fullResult: string;
   timestamp?: number;
+  resultLabel?: string;
 }
 
-export default function ResultCard({ toolName, fullResult, timestamp }: ResultCardProps) {
+export default function ResultCard({ toolName, fullResult, timestamp, resultLabel = 'Full Analysis' }: ResultCardProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -22,7 +23,7 @@ export default function ResultCard({ toolName, fullResult, timestamp }: ResultCa
     <div className="mt-6 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50">
         <div>
-          <h4 className="text-sm font-semibold text-gray-900">{toolName} — Full Analysis</h4>
+          <h4 className="text-sm font-semibold text-gray-900">{toolName} — {resultLabel}</h4>
           {timestamp && (
             <p className="text-[10px] text-gray-400 mt-0.5">
               {new Date(timestamp * 1000).toLocaleDateString()}
