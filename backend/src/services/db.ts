@@ -30,6 +30,14 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_results_telegram ON results(telegram_id);
 `);
 
+// Add UNIQUE index on tx_hash — guards against duplicate inserts from race conditions.
+// Wrapped in try/catch so it doesn't crash if (unlikely) duplicate data already exists.
+try {
+  db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_results_tx_hash ON results(tx_hash);`);
+} catch (err) {
+  console.warn('Could not create unique index on tx_hash (duplicate data may exist):', err);
+}
+
 export const insertResult = db.prepare(`
   INSERT INTO results (telegram_id, tool_id, input_summary, full_result, tx_hash, paid_at)
   VALUES (@telegram_id, @tool_id, @input_summary, @full_result, @tx_hash, @paid_at)

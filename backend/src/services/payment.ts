@@ -13,6 +13,21 @@ const pendingResults = new Map<string, PendingResult>();
 
 const SESSION_TTL_MS = 30 * 60 * 1000;
 
+// ─── In-progress guard (prevents double-spend via concurrent unlock calls) ─
+const inProgressSessions = new Set<string>();
+
+/** Mark session as being processed. Returns false if already claimed. */
+export function claimSession(sessionToken: string): boolean {
+  if (inProgressSessions.has(sessionToken)) return false;
+  inProgressSessions.add(sessionToken);
+  return true;
+}
+
+/** Release the in-progress lock (call in a finally block). */
+export function releaseSession(sessionToken: string): void {
+  inProgressSessions.delete(sessionToken);
+}
+
 export function createSession(
   telegramId: string,
   toolId: string,
@@ -63,7 +78,7 @@ export async function verifyTonPayment(
     }
 
     const res = await fetch(
-      `${baseUrl}/getTransactions?address=${walletAddress}&limit=20&archival=true`,
+      `${baseUrl}/getTransactions?address=${walletAddress}&limit=50&archival=true`,
       { headers }
     );
 
@@ -84,18 +99,23 @@ export async function verifyTonPayment(
 
       const txTime = tx.utime || 0;
       const now = Math.floor(Date.now() / 1000);
-      if (now - txTime > 600) continue;
+      // Extended window: 30 minutes to handle slow blockchain / API lag
+      if (now - txTime > 1800) continue;
 
       const comment = inMsg.message || '';
-      if (comment === expectedSessionToken) {
-        return true;
-      }
 
+      // Strategy 1: TON Center decoded the cell text for us — direct match
+      if (comment === expectedSessionToken) return true;
+
+      // Strategy 2: TON Center returned raw base64 cell content — decode and
+      // strip the 4-byte text-comment op-code (0x00000000) if present
       try {
-        const decoded = atob(comment);
-        if (decoded === expectedSessionToken) {
-          return true;
-        }
+        const raw = Buffer.from(comment, 'base64');
+        const text =
+          raw.length > 4 && raw.readUInt32BE(0) === 0
+            ? raw.slice(4).toString('utf8')   // strip op-code prefix
+            : raw.toString('utf8');
+        if (text === expectedSessionToken) return true;
       } catch {}
     }
 

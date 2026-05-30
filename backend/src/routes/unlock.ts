@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getPendingResult, removePendingResult, verifyTonPayment } from '../services/payment';
+import { getPendingResult, removePendingResult, verifyTonPayment, claimSession, releaseSession } from '../services/payment';
 import { insertResult } from '../services/db';
 import { UnlockRequest, UnlockResponse } from '../../../shared/types';
 
@@ -24,19 +24,26 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  // ── Atomic claim: prevent two concurrent requests from both unlocking ─────
+  if (!claimSession(sessionToken)) {
+    res.status(409).json({ error: 'Payment already being processed. Please wait.' });
+    return;
+  }
+
   const walletAddress = process.env.LEXON_WALLET_ADDRESS;
   if (!walletAddress) {
+    releaseSession(sessionToken);
     res.status(500).json({ error: 'Payment wallet not configured.' });
     return;
   }
 
-  const isValid = await verifyTonPayment(txHash, sessionToken, walletAddress);
-  if (!isValid) {
-    res.status(402).json({ error: 'Payment not verified. Please wait a moment and try again.' });
-    return;
-  }
-
   try {
+    const isValid = await verifyTonPayment(txHash, sessionToken, walletAddress);
+    if (!isValid) {
+      res.status(402).json({ error: 'Payment not verified. Please wait a moment and try again.' });
+      return;
+    }
+
     insertResult.run({
       telegram_id: telegramId,
       tool_id: pending.toolId,
@@ -53,6 +60,8 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   } catch (err) {
     console.error('Unlock error:', err);
     res.status(500).json({ error: 'Failed to save result.' });
+  } finally {
+    releaseSession(sessionToken); // always release the lock
   }
 });
 

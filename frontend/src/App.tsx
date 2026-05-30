@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { useTelegramUser } from './hooks/useTelegramUser';
+import { useSyncWallet } from './hooks/useSyncWallet';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import History from './pages/History';
@@ -11,6 +12,7 @@ const MANIFEST_URL = import.meta.env.VITE_TONCONNECT_MANIFEST_URL || `${window.l
 
 function TelegramInit() {
   useTelegramUser();
+  useSyncWallet();
   return null;
 }
 
