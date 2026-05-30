@@ -84,14 +84,30 @@ export function usePhantomPayment() {
 
       return res.data.full;
     } catch (err: any) {
-      if (err?.code === 4001 || err?.message?.toLowerCase().includes('reject')) {
+      const msg: string = err?.message || '';
+      const code: number = err?.code ?? 0;
+
+      if (code === 4001 || msg.toLowerCase().includes('reject')) {
         setError('Payment cancelled.');
-      } else if (err?.message?.includes('Wallet not connected')) {
+      } else if (msg.includes('Wallet not connected')) {
         setError('Please connect your Phantom wallet first.');
-      } else if (err?.message?.includes('insufficient') || err?.message?.includes('0x1')) {
-        setError('Insufficient USDC balance. You need at least 1 USDC + a small amount of SOL for fees.');
+      } else if (msg.includes('insufficient') || msg.includes('0x1')) {
+        setError('Insufficient USDC balance. You need at least 1 USDC + a small amount of SOL for network fees.');
+      } else if (
+        msg.includes('blockhash') ||
+        msg.includes('403') ||
+        msg.includes('Access forbidden') ||
+        msg.includes('429') ||
+        msg.includes('Too many')
+      ) {
+        // Public Solana RPC rate-limit — suggest retry
+        setError('Solana network is busy. Please wait a few seconds and try again.');
+      } else if (msg.includes('failed to send') || msg.includes('Transaction simulation')) {
+        setError('Transaction failed on Solana. Make sure you have USDC and enough SOL for fees.');
+      } else if (err.response?.data?.error) {
+        setError(err.response.data.error);
       } else {
-        setError(err.response?.data?.error || err.message || 'Payment failed. Please try again.');
+        setError('Payment failed. Please try again.');
       }
       return null;
     } finally {

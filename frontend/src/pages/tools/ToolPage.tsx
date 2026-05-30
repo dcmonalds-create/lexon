@@ -115,7 +115,7 @@ export default function ToolPage() {
     if (isUrlMode) {
       if (!input.trim() || !isValidUrl(input.trim())) return;
     } else {
-      if (!input.trim() && !attachedFile) return;
+      if (!attachedFile && input.trim().length < MIN_CHARS) return;
     }
 
     window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('medium');
@@ -141,9 +141,10 @@ export default function ToolPage() {
     window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');
   };
 
+  const MIN_CHARS = 20; // require at least 20 characters of real description
   const canSubmit = isUrlMode
     ? input.trim().length > 0 && isValidUrl(input.trim())
-    : input.trim().length > 0 || attachedFile !== null;
+    : input.trim().length >= MIN_CHARS || attachedFile !== null;
 
   const domain = isUrlMode && input ? extractDomain(input) : '';
 
@@ -306,9 +307,16 @@ export default function ToolPage() {
 
               {/* Text Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {tool.inputLabel}
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    {tool.inputLabel}
+                  </label>
+                  {!attachedFile && input.trim().length > 0 && input.trim().length < MIN_CHARS && (
+                    <span className="text-[11px] text-amber-500 font-medium">
+                      {MIN_CHARS - input.trim().length} more chars needed
+                    </span>
+                  )}
+                </div>
                 <textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
