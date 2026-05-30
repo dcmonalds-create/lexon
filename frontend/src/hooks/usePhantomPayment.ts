@@ -7,6 +7,26 @@ const LEXON_SOLANA_WALLET = import.meta.env.VITE_SOLANA_WALLET || '';
 const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 const MEMO_PROGRAM_ID = 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr';
 
+// Helius free-tier is the reliable default; Railway VITE_SOLANA_RPC overrides it
+// (VITE_ vars are baked at build time — this constant is the safe fallback)
+const SOLANA_RPC_URL =
+  import.meta.env.VITE_SOLANA_RPC ||
+  'https://mainnet.helius-rpc.com/?api-key=4ff61bc5-0f95-4446-9bdd-837cdb56bae4';
+
+async function getBlockhashWithRetry(connection: import('@solana/web3.js').Connection): Promise<string> {
+  const MAX = 3;
+  for (let attempt = 1; attempt <= MAX; attempt++) {
+    try {
+      const { blockhash } = await connection.getLatestBlockhash();
+      return blockhash;
+    } catch (err) {
+      if (attempt === MAX) throw err;
+      await new Promise((r) => setTimeout(r, attempt * 1000));
+    }
+  }
+  throw new Error('Failed to fetch blockhash');
+}
+
 export function usePhantomPayment() {
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,10 +53,7 @@ export function usePhantomPayment() {
       if (!storedPublicKey) throw new Error('Wallet not connected.');
       const userPublicKey = new PublicKey(storedPublicKey);
 
-      const connection = new Connection(
-        import.meta.env.VITE_SOLANA_RPC || 'https://api.mainnet-beta.solana.com',
-        'confirmed'
-      );
+      const connection = new Connection(SOLANA_RPC_URL, 'confirmed');
 
       const mint = new PublicKey(USDC_MINT);
       const lexonWallet = new PublicKey(LEXON_SOLANA_WALLET);
@@ -68,7 +85,7 @@ export function usePhantomPayment() {
         })
       );
 
-      const { blockhash } = await connection.getLatestBlockhash();
+      const blockhash = await getBlockhashWithRetry(connection);
       tx.recentBlockhash = blockhash;
       tx.feePayer = userPublicKey;
 
