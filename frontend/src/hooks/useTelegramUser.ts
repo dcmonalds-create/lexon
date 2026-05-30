@@ -74,7 +74,7 @@ export function useTelegramUser() {
     // Try Google OAuth session first, then fall back to anonymous ID
     (async () => {
       try {
-        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        const res = await fetch('/auth/me', { credentials: 'include' });
         if (res.ok) {
           const user = await res.json() as {
             id: string;
