@@ -12,6 +12,7 @@ import { LEXDRAFT_PROMPT } from '../prompts/lexdraft';
 import { LEXSCAM_PROMPT } from '../prompts/lexscam';
 import { LEXSALARY_PROMPT } from '../prompts/lexsalary';
 import { LEXCOMPARE_PROMPT } from '../prompts/lexcompare';
+import { LEXAUDIT_PROMPT } from '../prompts/lexaudit';
 
 const client = new Anthropic();
 
@@ -67,6 +68,7 @@ const PROMPT_MAP: Record<string, (input: string) => string> = {
   lexscam: LEXSCAM_PROMPT,
   lexsalary: LEXSALARY_PROMPT,
   lexcompare: LEXCOMPARE_PROMPT,
+  lexaudit: LEXAUDIT_PROMPT,
 };
 
 type SupportedImageType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
