@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
+import { usePhantomStore } from '../store/phantomStore';
 
 declare global {
   interface Window {
@@ -46,6 +47,25 @@ function getOrCreateFallbackId(): string {
 
 export function useTelegramUser() {
   const setUser = useUserStore((s) => s.setUser);
+  const needsSignIn = useUserStore((s) => s.needsSignIn);
+  const phantomConnected = usePhantomStore((s) => s.connected);
+  const phantomPublicKey = usePhantomStore((s) => s.publicKey);
+
+  // When Phantom wallet connects while the sign-in gate is showing, use the
+  // wallet address as identity. This covers Phantom's built-in browser where
+  // Google OAuth is blocked (Error 403 disallowed_useragent).
+  useEffect(() => {
+    if (!needsSignIn || !phantomConnected || !phantomPublicKey) return;
+    setUser({
+      telegramId: `phantom_${phantomPublicKey}`,
+      firstName: `${phantomPublicKey.slice(0, 4)}…${phantomPublicKey.slice(-4)}`,
+      lastName: '',
+      username: phantomPublicKey,
+      languageCode: navigator.language?.split('-')[0] || 'en',
+      isWeb: true,
+      needsSignIn: false,
+    });
+  }, [needsSignIn, phantomConnected, phantomPublicKey, setUser]);
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
