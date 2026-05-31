@@ -38,4 +38,17 @@ export async function solanaUnlock(data: SolanaUnlockRequest): Promise<{ full: s
   return res.data;
 }
 
+export interface CreateReminderRequest {
+  telegramId: string;
+  toolId: string;
+  toolName: string;
+  summary: string;
+  days: number;
+}
+
+export async function createReminder(data: CreateReminderRequest): Promise<{ id: number; remindAt: number }> {
+  const res = await api.post<{ id: number; remindAt: number }>('/reminders', data);
+  return res.data;
+}
+
 export default api;

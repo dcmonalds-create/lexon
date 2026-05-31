@@ -8,6 +8,7 @@ import ResultCard from '../../components/ResultCard';
 import FollowUp from '../../components/FollowUp';
 import Loader from '../../components/Loader';
 import QuizForm from '../../components/QuizForm';
+import ReminderButton from '../../components/ReminderButton';
 
 const MAX_FILE_SIZE_MB = 10;
 
@@ -194,6 +195,13 @@ export default function ToolPage() {
       {fullResult ? (
         <div>
           <ResultCard toolName={tool.name} fullResult={fullResult} resultLabel={resultLabel} />
+          {!isDocMode && !isUrlMode && (
+            <ReminderButton
+              toolId={tool.id}
+              toolName={tool.name}
+              summary={input.trim().slice(0, 200) || `${tool.name} case`}
+            />
+          )}
           <FollowUp fullResult={fullResult} />
           <button
             onClick={handleNewAnalysis}

@@ -11,7 +11,9 @@ import historyRouter from './routes/history';
 import followUpRouter from './routes/followup';
 import solanaUnlockRouter from './routes/solana-unlock';
 import authRouter from './routes/auth';
+import remindersRouter from './routes/reminders';
 import { initDb } from './services/db';
+import { startReminderScheduler } from './services/reminderScheduler';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -84,6 +86,7 @@ app.use('/api/unlock', unlockRouter);
 app.use('/api/history', historyRouter);
 app.use('/api/followup', globalLimit, followUpRouter);
 app.use('/api/solana-unlock', globalLimit, solanaUnlockRouter);
+app.use('/api/reminders', globalLimit, remindersRouter);
 app.use('/auth', authRouter);
 
 // ─── Frontend static build ────────────────────────────────────────────────────
@@ -95,6 +98,7 @@ app.get('*', (_req, res) => {
 
 initDb()
   .then(() => {
+    startReminderScheduler();
     app.listen(PORT, () => {
       console.log(`LexOn running on port ${PORT}`);
     });

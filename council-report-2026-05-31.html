@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>LexOn Feature Council — 2026-05-31</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #5a5a5a;
+    --line: #e6e6e6;
+    --bg: #fafaf8;
+    --card: #ffffff;
+    --green: #1D4035;
+    --red: #b3261e;
+    --amber: #b07e00;
+    --violet: #6f4ab8;
+    --blue: #2659a8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    margin: 0;
+    padding: 32px 16px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 760px; margin: 0 auto; }
+  header.title {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 18px;
+    margin-bottom: 26px;
+  }
+  header.title .stamp {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  header.title h1 {
+    font-size: 26px;
+    margin: 4px 0 6px;
+    letter-spacing: -0.01em;
+  }
+  header.title p.q {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0;
+  }
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin: 14px 0;
+  }
+  section h2 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  section h3 {
+    font-size: 17px;
+    margin: 14px 0 6px;
+  }
+  .verdict {
+    border-left: 4px solid var(--green);
+  }
+  .verdict h2 { color: var(--green); }
+  .recommendation {
+    background: #f4f9f6;
+    border-color: #d6e8de;
+  }
+  ol.steps { padding-left: 22px; margin: 8px 0 4px; }
+  ol.steps li { margin: 8px 0; }
+  .first-thing {
+    background: #fff5ea;
+    border-color: #f1d9b4;
+  }
+  .first-thing h2 { color: var(--amber); }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 6px 0;
+  }
+  @media (max-width: 520px) { .grid { grid-template-columns: 1fr; } }
+  .chip {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    background: #fff;
+  }
+  .chip.kill { background: #fbeeee; border-color: #f0cfcf; color: var(--red); }
+  .chip.build { background: #ecf5ef; border-color: #cfe2d6; color: var(--green); }
+  .chip.reframe { background: #f1eafc; border-color: #d8c7ee; color: var(--violet); }
+  .chip strong { display:block; font-weight: 600; margin-bottom: 2px; }
+  .chip span { color: var(--muted); }
+  .scoreboard {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 6px;
+    font-size: 13px;
+  }
+  .scoreboard th, .scoreboard td {
+    border-bottom: 1px solid var(--line);
+    padding: 8px 6px;
+    text-align: left;
+    vertical-align: middle;
+  }
+  .scoreboard th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .yes { color: var(--green); font-weight: 600; }
+  .no  { color: var(--red); }
+  .maybe { color: var(--amber); }
+  details {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    margin: 10px 0;
+    padding: 0;
+  }
+  details summary {
+    padding: 14px 18px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  details summary::after {
+    content: "+";
+    color: var(--muted);
+    font-size: 18px;
+  }
+  details[open] summary::after { content: "−"; }
+  details .body {
+    padding: 0 18px 16px;
+    font-size: 14px;
+    color: #262626;
+    white-space: pre-wrap;
+  }
+  .advisor-the-contrarian summary { color: var(--red); }
+  .advisor-the-expansionist summary { color: var(--green); }
+  .advisor-the-first-principles summary { color: var(--blue); }
+  .advisor-the-outsider summary { color: var(--violet); }
+  .advisor-the-executor summary { color: var(--amber); }
+  footer {
+    text-align: center;
+    margin-top: 36px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="title">
+    <div class="stamp">LexOn Feature Council · 2026-05-31</div>
+    <h1>Which 2–3 features should LexOn build next?</h1>
+    <p class="q">10 candidate features run through 5 advisors + peer review + chairman synthesis.</p>
+  </header>
+
+  <section class="verdict">
+    <h2>Chairman's Verdict</h2>
+    <p style="margin:0 0 10px;font-size:15px;"><strong>Build:</strong> LexLocal (Romania only) → LexTimeline (B2B-positioned, 3 USDT) → an Outcome Feed (the council-surfaced feature #11).</p>
+    <p style="margin:0 0 10px;font-size:15px;"><strong>Reframe:</strong> LexCall as a pre-call brief, not real-time coaching.</p>
+    <p style="margin:0;font-size:15px;"><strong>Do not build:</strong> LexWatch, LexNotary, LexBundle, LexPanel, LexShare, LexCase, LexVoice (in current form).</p>
+  </section>
+
+  <section>
+    <h2>Vote Scoreboard</h2>
+    <table class="scoreboard">
+      <thead>
+        <tr><th>Feature</th><th>Contr.</th><th>1st Princ.</th><th>Expans.</th><th>Outsider</th><th>Executor</th><th>Tally</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>LexLocal</strong></td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">×</td><td class="yes">4 / 5</td></tr>
+        <tr><td><strong>LexTimeline</strong></td><td class="no">×</td><td class="no">×</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="maybe">3 / 5</td></tr>
+        <tr><td>LexCall</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="yes">✓</td><td class="yes">✓</td><td class="maybe">2 / 5</td></tr>
+        <tr><td>LexCase</td><td class="no">×</td><td class="yes">✓</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">1 / 5</td></tr>
+        <tr><td>LexVoice</td><td class="yes">✓</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">1 / 5</td></tr>
+        <tr><td>LexPanel</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="yes">✓</td><td class="no">1 / 5</td></tr>
+        <tr><td>LexShare</td><td class="no">×</td><td class="no">×</td><td class="yes">✓</td><td class="no">×</td><td class="no">×</td><td class="no">1 / 5</td></tr>
+        <tr><td>LexBundle</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">0 / 5</td></tr>
+        <tr><td>LexWatch</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">0 / 5</td></tr>
+        <tr><td>LexNotary</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">×</td><td class="no">0 / 5</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="recommendation">
+    <h2>The Recommendation</h2>
+    <ol class="steps">
+      <li><strong>LexLocal — Romania only.</strong> Hardcode a directory of RO authorities (ITM, ANPC, ANSPDCP, IPJ Cybercrime, ANAF). Inject <code>{LOCAL_AUTHORITIES_RO}</code> into every existing prompt. No 35-language maintenance burden. Ship in a weekend.</li>
+      <li><strong>LexTimeline — priced at 3 USDT, B2B-positioned.</strong> One prompt, structured chronology output. Market dual-channel: scared consumers AND solo lawyers (25× ARPU upside).</li>
+      <li><strong>Outcome Feed (new — surfaced by the council).</strong> A <code>/wins</code> page with anonymous opt-in "result + amount recovered + jurisdiction" entries. Credibility, not virality. Reframes LexOn from "legal advice" to "tool that recovers money" — also regulatory cover.</li>
+      <li><strong>LexCall → reframe as pre-call brief.</strong> Same content, no real-time exposure. Ships in a weekend as a normal prompt tool.</li>
+    </ol>
+  </section>
+
+  <section class="first-thing">
+    <h2>The One Thing to Do First</h2>
+    <p style="margin:0;font-size:15px;">Open <code>/backend/src/data/authorities-ro.ts</code> and hardcode 8 entries — ITM Bucureşti, ANPC Centrală, ANSPDCP, IPJ Cybercrime, ANAF Sector 1, plus ITM Cluj / Timiş / Iaşi. Name, address, phone, online form URL, jurisdiction. Inject into TenantShield, WorkerShield, LexScam, FineBot prompts. Every Romanian output becomes non-substitutable overnight. <strong>Ship by Sunday night.</strong></p>
+  </section>
+
+  <section>
+    <h2>Where the Council Agrees</h2>
+    <ul>
+      <li><strong>LexLocal is the only universal pick</strong> — chosen by 4 of 5 advisors independently. The reason: hyperlocal authority refs are <em>data-work</em>, not prompt-work, and that's defensible.</li>
+      <li><strong>Unanimous kill list:</strong> LexWatch, LexNotary, LexBundle, LexPanel. Each was rejected by ≥4 of 5 advisors and confirmed in peer review.</li>
+      <li><strong>"One prompt + one config" is the design constraint, not a slogan.</strong> Three advisors warned half the list (Watch, Bundle, Notary, Case) are platforms-disguised-as-features.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Where the Council Clashes</h2>
+    <h3>LexShare — distribution gold or GDPR landmine?</h3>
+    <p>Expansionist alone saw it as the 10× distribution engine. Outsider, Contrarian, Executor independently demolished it: scared people don't share legal trauma during the fight (only after winning), PII redaction is a month-long rabbit hole, EU GDPR exposure is real. <strong>The Expansionist is wrong about the channel.</strong></p>
+    <h3>LexCall — beloved by users, hated by strategists</h3>
+    <p>Only Outsider and Executor endorsed it. Contrarian and Expansionist flagged real-time coaching as a regulatory landmine. <strong>Resolution: ship the prompt as a pre-call brief, not live coaching.</strong></p>
+    <h3>LexTimeline — retention trap or B2B unlock?</h3>
+    <p>Contrarian and First Principles flagged retention features as CRM creep. Executor, Outsider, Expansionist all picked it. <strong>Resolution: build it priced as a stand-alone tool, not as retention glue.</strong></p>
+  </section>
+
+  <section>
+    <h2>Blind Spots the Council Caught (only via peer review)</h2>
+    <ul>
+      <li><strong>The founder is not a generic legal-tech founder.</strong> All 5 reviewers flagged this: bilingual RO/HU oversized-transport escort with deep vertical knowledge (permits, bridge clearances, A.S.T. routes). <strong>The biggest move on the table is whether LexOn's next chapter is vertical depth in transport / haulage compliance RO+HU rather than horizontal "legal anxiety."</strong></li>
+      <li><strong>The regulatory ceiling is the real existential risk.</strong> ANPC complaints, BNR/crypto-VAT reclassification, MiCA 2026, Law 51/1995 unauthorized-practice-of-law exposure. None of the 10 candidate features address this. Three reviewers raised it independently.</li>
+      <li><strong>The bilingual RO/HU stack is an under-priced moat.</strong> English-first competitors (DoNotPay) can't credibly cover RO or HU. None of the 10 features double down on this.</li>
+      <li><strong>The verified outcome feed (only proposed by First Principles) is the only feature that compounds.</strong> Every win becomes acquisition fuel AND regulatory cover. Multiple reviewers reinforced this independently.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>The 10 Candidates — Final Disposition</h2>
+    <div class="grid">
+      <div class="chip build"><strong>✓ LexLocal</strong><span>RO-only directory. Build first.</span></div>
+      <div class="chip build"><strong>✓ LexTimeline</strong><span>3 USDT, B2B positioning.</span></div>
+      <div class="chip build"><strong>✓ Outcome Feed (new)</strong><span>Credibility + regulatory cover.</span></div>
+      <div class="chip reframe"><strong>↺ LexCall</strong><span>Reframe as pre-call brief.</span></div>
+      <div class="chip kill"><strong>✕ LexShare</strong><span>Nobody shares legal trauma.</span></div>
+      <div class="chip kill"><strong>✕ LexVoice</strong><span>3-platform recording UI hides weeks.</span></div>
+      <div class="chip kill"><strong>✕ LexBundle</strong><span>Bundling is pricing, not product.</span></div>
+      <div class="chip kill"><strong>✕ LexPanel</strong><span>3 prompts in a trench coat.</span></div>
+      <div class="chip kill"><strong>✕ LexCase</strong><span>CRM creep. Heavyweight refactor.</span></div>
+      <div class="chip kill"><strong>✕ LexWatch</strong><span>6-month product disguised.</span></div>
+      <div class="chip kill"><strong>✕ LexNotary</strong><span>Crypto-theater. Legally meaningless.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Advisor Responses (click to expand)</h2>
+
+    <details class="advisor-the-first-principles">
+      <summary>The First Principles Thinker — &quot;the question is wrong&quot;</summary>
+      <div class="body">A single prompt is copyable — no feature here is a moat. LexOn is a payment-gated wrapper around Claude Opus for legal anxiety. The real question is "why pick LexOn over free ChatGPT?" Three things matter: Distribution (you have it), Trust at moment of fear, Outcome over analysis. Only LexLocal (ChatGPT can't fake "Sector 3, form 24-B" credibly) and LexCase (returning users compound; switching cost) survive. The real moat nobody's building: a verified outcome feed. "127 Romanians recovered €43k via LexOn this month." Ship that instead of feature #11.</div>
+    </details>
+
+    <details class="advisor-the-expansionist">
+      <summary>The Expansionist — &quot;build LexShare, LexLocal, LexTimeline&quot;</summary>
+      <div class="body">LexShare is the 10× distribution engine — anon "I caught my landlord stealing €4,200" cards on TikTok/Reddit in 35 languages, CAC → 0. DoNotPay never cracked virality because legal results feel private; make them feel like receipts. LexLocal is the B2B wedge — RO+HU mappings unlock municipal consumer-protection offices and unions with white-label deals. LexTimeline unlocks legal-ops — solo lawyers pay 50 USDT, not 2. Kill LexNotary, LexCall, LexVoice, LexBundle. The 11th feature you're missing: LexBounty — public scammer registry; banks, exchanges, Phantom become API customers. Data layer of fraud in CEE. Company-defining play.</div>
+    </details>
+
+    <details class="advisor-the-contrarian">
+      <summary>The Contrarian — &quot;the list is a graveyard&quot;</summary>
+      <div class="body">Eight of these violate "one prompt + one config." Kill: LexWatch (liability bomb across 35 jurisdictions), LexCall (real-time = latency SLAs and user blames you when HR fires them), LexNotary (legally meaningless crypto-theater inviting notary-licensing issues), LexPanel (three prompts in a trench coat at 5× price), LexBundle (margin-eater), LexShare (GDPR landmine + nobody shares legal anxiety publicly). Build only LexLocal and LexVoice. LexTimeline and LexCase are traps disguised as retention. You're a transactional tool. Don't become a CRM.</div>
+    </details>
+
+    <details class="advisor-the-outsider">
+      <summary>The Outsider — &quot;rescue verbs, not Lex-nouns&quot;</summary>
+      <div class="body">I opened this and got tired by the third name. Lex-this, Lex-that. They blur. I cannot tell which one to click when my landlord just threatened to evict me. The one I'd pay 5 USDT for at 11pm with hands shaking: LexCall. Someone is on the phone RIGHT NOW pressuring me. A script on my screen telling me exactly what to say — that's rescue. Second: LexLocal (the actual phone number of the actual office in my actual city). Third, quietly: LexTimeline — my story IS messy. Kill LexNotary, LexBundle, LexPanel, LexShare ("I am NOT sharing my eviction story for your viral loop, are you serious?"). The list was written by someone who already understands legal triage. A scared person needs rescue verbs, not Lex-nouns.</div>
+    </details>
+
+    <details class="advisor-the-executor">
+      <summary>The Executor — &quot;Monday morning: open /prompts/lex_timeline.md&quot;</summary>
+      <div class="body">Ship this weekend (one prompt + one config): LexTimeline, LexPanel, LexCall. Hidden weeks of work: LexShare (PII rabbit hole), LexBundle (state), LexLocal (directory IS full-time job). Don't touch: LexNotary (Solana ops), LexWatch (cron + change detection across 3 platforms = six-month product), LexCase (heavyweight refactor), LexVoice (recording UI × 3 platforms). Build order Mon-Fri: Timeline → Call → Panel. Three tools, one week, zero new infrastructure. Half this list is platforms not features. Stay in prompt-file land.</div>
+    </details>
+  </section>
+
+  <section>
+    <h2>Peer Review Highlights</h2>
+    <p><strong>Strongest response:</strong> 4 of 5 reviewers picked the First Principles Thinker — &quot;the only response that refuses the premise.&quot; 1 reviewer (the dissenter) picked the Expansionist for converting strategy into shippable scope.</p>
+    <p><strong>Biggest blind spot:</strong> 4 of 5 reviewers flagged the Expansionist — LexShare misreads the content category, LexBounty invites defamation + GDPR Article 10 exposure, "founder-LinkedIn brain dressed as strategy."</p>
+    <p><strong>What ALL 5 advisors missed:</strong> the founder's own vertical context (RO/HU oversized transport — a genuine domain advantage hiding in plain sight), the regulatory ceiling on USDT-priced legal advice in RO/HU (Law 51/1995, MiCA, ANPC), and the under-priced moat of the bilingual RO/HU stack itself.</p>
+  </section>
+
+  <footer>
+    Council convened 2026-05-31 · Full transcript: <code>council-transcript-2026-05-31.md</code>
+  </footer>
+</main>
+</body>
+</html>
