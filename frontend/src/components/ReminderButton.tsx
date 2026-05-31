@@ -22,8 +22,6 @@ export default function ReminderButton({ toolId, toolName, summary }: ReminderBu
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reminders need a real Telegram chat_id. Web users (google_*, phantom_*,
-  // anon_*) can't receive them — show a CTA pointing them to the bot instead.
   const canRemind = !isWeb && /^-?\d+$/.test(telegramId);
 
   const handlePick = async (days: number) => {
@@ -44,14 +42,26 @@ export default function ReminderButton({ toolId, toolName, summary }: ReminderBu
     }
   };
 
+  const cardStyle: React.CSSProperties = {
+    background: 'var(--paper-3)',
+    border: '1px solid var(--rule-soft)',
+    borderRadius: '14px',
+    padding: '16px 18px',
+  };
+
   if (!canRemind) {
     return (
-      <div className="mt-4 bg-white border border-gray-200 rounded-2xl p-4">
+      <div className="mt-4" style={cardStyle}>
         <div className="flex items-center gap-2 mb-1.5">
-          <Bell className="w-3.5 h-3.5 text-amber-500" />
-          <p className="text-xs font-semibold text-gray-700">Want a deadline reminder?</p>
+          <Bell className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} strokeWidth={1.8} />
+          <p
+            className="font-mono text-[10px] uppercase tracking-[0.18em]"
+            style={{ color: 'var(--ink-3)' }}
+          >
+            Deadline reminder
+          </p>
         </div>
-        <p className="text-xs text-gray-500">
+        <p className="text-[13px] leading-snug" style={{ color: 'var(--ink-2)' }}>
           Reminders are sent via Telegram. Open LexOn inside the Telegram Mini App to use this feature.
         </p>
       </div>
@@ -60,26 +70,46 @@ export default function ReminderButton({ toolId, toolName, summary }: ReminderBu
 
   if (chosenDays !== null) {
     return (
-      <div className="mt-4 bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-2.5">
-        <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center shrink-0">
-          <Check className="w-4 h-4 text-white" />
+      <div
+        className="mt-4 flex items-center gap-3"
+        style={{
+          background: 'var(--brand-soft)',
+          border: '1px solid var(--brand)',
+          borderRadius: '14px',
+          padding: '14px 18px',
+        }}
+      >
+        <div
+          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+          style={{ background: 'var(--brand)', color: 'var(--on-brand)' }}
+        >
+          <Check className="w-4 h-4" strokeWidth={2.2} />
         </div>
         <div>
-          <p className="text-sm font-semibold text-emerald-900">Reminder set</p>
-          <p className="text-xs text-emerald-700">We'll message you in {chosenDays} days via Telegram.</p>
+          <p
+            className="font-mono text-[10px] uppercase tracking-[0.18em]"
+            style={{ color: 'var(--brand)' }}
+          >
+            Reminder set
+          </p>
+          <p className="text-[13px] leading-snug mt-0.5" style={{ color: 'var(--ink)' }}>
+            We'll message you in <span className="tabular font-mono">{chosenDays}</span> days via Telegram.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mt-4 bg-white border border-gray-200 rounded-2xl p-4">
-      <div className="flex items-center gap-2 mb-2.5">
-        <Bell className="w-3.5 h-3.5 text-amber-500" />
-        <p className="text-xs font-semibold text-gray-700">Remind me before the deadline</p>
-        <span className="ml-auto text-[10px] font-medium bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">
-          Free
-        </span>
+    <div className="mt-4" style={cardStyle}>
+      <div className="flex items-center gap-2 mb-3">
+        <Bell className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} strokeWidth={1.8} />
+        <p
+          className="font-mono text-[10px] uppercase tracking-[0.18em]"
+          style={{ color: 'var(--ink-3)' }}
+        >
+          Remind me before the deadline
+        </p>
       </div>
       <div className="grid grid-cols-3 gap-2">
         {OPTIONS.map(({ days, label }) => (
@@ -88,13 +118,35 @@ export default function ReminderButton({ toolId, toolName, summary }: ReminderBu
             type="button"
             disabled={loading}
             onClick={() => handlePick(days)}
-            className="text-xs font-medium bg-amber-50 hover:bg-amber-100 active:bg-amber-200 disabled:opacity-50 text-amber-800 border border-amber-200 rounded-xl py-2 transition-colors"
+            className="text-[13px] font-medium py-2.5 transition-colors disabled:opacity-50"
+            style={{
+              background: 'transparent',
+              color: 'var(--ink)',
+              border: '1px solid var(--rule)',
+              borderRadius: '10px',
+              fontFamily: 'var(--font-sans)',
+            }}
+            onMouseEnter={(e) => {
+              if (loading) return;
+              e.currentTarget.style.background = 'var(--accent-soft)';
+              e.currentTarget.style.borderColor = 'var(--accent)';
+              e.currentTarget.style.color = 'var(--accent)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.borderColor = 'var(--rule)';
+              e.currentTarget.style.color = 'var(--ink)';
+            }}
           >
             {label}
           </button>
         ))}
       </div>
-      {error && <p className="text-xs text-red-500 mt-2">{error}</p>}
+      {error && (
+        <p className="text-xs mt-2" style={{ color: 'var(--verdict-danger)' }}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }

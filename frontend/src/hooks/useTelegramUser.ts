@@ -117,7 +117,7 @@ export function useTelegramUser() {
         // Network error — fall through to anonymous
       }
 
-      // Not authenticated on web → show sign-in prompt
+      // Not authenticated on web → show sign-in prompt (skipped in DEV)
       const fallbackId = getOrCreateFallbackId();
       setUser({
         telegramId: fallbackId,
@@ -126,7 +126,7 @@ export function useTelegramUser() {
         username: import.meta.env.DEV ? 'devuser' : '',
         languageCode: navigator.language?.split('-')[0] || 'en',
         isWeb: true,
-        needsSignIn: true,
+        needsSignIn: !import.meta.env.DEV,
       });
     })();
   }, [setUser]);

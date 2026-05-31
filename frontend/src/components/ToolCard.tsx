@@ -1,22 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  FileText, AlertTriangle, Home, Briefcase, Receipt, Coins, ScrollText, Link, PenLine, ShieldAlert, BadgeDollarSign, GitCompareArrows,
+  FileText, AlertTriangle, Home, Briefcase, Receipt, Coins, ScrollText, Link, PenLine,
+  ShieldAlert, BadgeDollarSign, GitCompareArrows,
 } from 'lucide-react';
 import type { Tool } from '../types';
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  FileText,
-  AlertTriangle,
-  Home,
-  Briefcase,
-  Receipt,
-  Coins,
-  ScrollText,
-  Link,
-  PenLine,
-  ShieldAlert,
-  BadgeDollarSign,
-  GitCompareArrows,
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
+  FileText, AlertTriangle, Home, Briefcase, Receipt, Coins, ScrollText, Link, PenLine,
+  ShieldAlert, BadgeDollarSign, GitCompareArrows,
 };
 
 export default function ToolCard({ tool }: { tool: Tool }) {
@@ -26,24 +17,62 @@ export default function ToolCard({ tool }: { tool: Tool }) {
   return (
     <button
       onClick={() => navigate(`/tool/${tool.id}`)}
-      className={`${tool.color} rounded-2xl p-4 text-left transition-all active:scale-[0.97] hover:shadow-md border border-transparent hover:border-gray-200 w-full`}
+      className="group relative w-full text-left transition-all active:scale-[0.985]"
+      style={{
+        background: 'var(--paper-3)',
+        border: '1px solid var(--rule-soft)',
+        borderRadius: '14px',
+        padding: '14px 16px 14px 18px',
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--ink-3)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--rule-soft)'; }}
     >
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-xl bg-white/80 flex items-center justify-center shrink-0">
+      {/* Sienna spine — appears on hover */}
+      <span
+        aria-hidden
+        className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ background: 'var(--accent)' }}
+      />
+
+      <div className="flex items-start gap-3.5">
+        {/* Icon plate */}
+        <div
+          className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
+          style={{
+            background: 'var(--brand-soft)',
+            color: 'var(--brand)',
+          }}
+        >
           {IconComponent ? (
-            <IconComponent className="w-5 h-5 text-gray-700" />
+            <IconComponent className="w-[18px] h-[18px]" strokeWidth={1.7} />
           ) : (
-            <span className="text-lg">{tool.icon}</span>
+            <span className="text-base">{tool.icon}</span>
           )}
         </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-gray-900 text-sm">{tool.name}</h3>
-            <span className="text-[10px] font-medium bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded-full">
+
+        <div className="min-w-0 flex-1">
+          {/* Tool name in display serif + price in mono */}
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <h3
+              className="font-display text-[19px] leading-none"
+              style={{ color: 'var(--ink)' }}
+            >
+              {tool.name}
+            </h3>
+            <span
+              className="font-mono text-[10px] tabular tracking-wide"
+              style={{ color: 'var(--ink-3)' }}
+            >
               {tool.price} USDT
             </span>
           </div>
-          <p className="text-xs text-gray-500 mt-0.5">{tool.tagline}</p>
+
+          <p
+            className="text-[13px] mt-1.5 leading-snug"
+            style={{ color: 'var(--ink-2)' }}
+          >
+            {tool.tagline}
+          </p>
         </div>
       </div>
     </button>
