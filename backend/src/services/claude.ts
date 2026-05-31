@@ -127,8 +127,8 @@ export async function analyzeWithClaude(
   content.push({ type: 'text', text: promptText });
 
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 4096,
+    model: 'claude-opus-4-7',
+    max_tokens: 6000,
     messages: [{ role: 'user', content }],
   });
 
