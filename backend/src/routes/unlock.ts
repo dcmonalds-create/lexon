@@ -44,7 +44,7 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    insertResult.run({
+    await insertResult({
       telegram_id: telegramId,
       tool_id: pending.toolId,
       input_summary: pending.inputSummary,

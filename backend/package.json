@@ -14,7 +14,7 @@
     "@ton/core": "^0.60.0",
     "@ton/crypto": "^3.3.0",
     "@ton/ton": "^15.0.0",
-    "better-sqlite3": "^11.0.0",
+    "pg": "^8.13.0",
     "bs58": "^6.0.0",
     "cheerio": "^1.2.0",
     "cors": "^2.8.5",
@@ -27,7 +27,7 @@
     "uuid": "^11.0.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.0",
+    "@types/pg": "^8.11.0",
     "@types/bs58": "^4.0.4",
     "@types/cors": "^2.8.0",
     "@types/express": "^5.0.0",

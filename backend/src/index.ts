@@ -11,6 +11,7 @@ import historyRouter from './routes/history';
 import followUpRouter from './routes/followup';
 import solanaUnlockRouter from './routes/solana-unlock';
 import authRouter from './routes/auth';
+import { initDb } from './services/db';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
@@ -92,6 +93,13 @@ app.get('*', (_req, res) => {
   res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`LexOn running on port ${PORT}`);
-});
+initDb()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`LexOn running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('[db] Failed to initialise database — exiting:', err);
+    process.exit(1);
+  });

@@ -1,11 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { getHistory } from '../services/db';
-import { HistoryItem } from '../../../shared/types';
 
 const router = Router();
 
-router.get('/:telegramId', (req: Request, res: Response): void => {
-  const { telegramId } = req.params;
+router.get('/:telegramId', async (req: Request, res: Response): Promise<void> => {
+  const telegramId = req.params.telegramId as string;
 
   if (!telegramId) {
     res.status(400).json({ error: 'Missing telegramId' });
@@ -13,7 +12,7 @@ router.get('/:telegramId', (req: Request, res: Response): void => {
   }
 
   try {
-    const results = getHistory.all(telegramId) as HistoryItem[];
+    const results = await getHistory(telegramId);
     res.json({ results });
   } catch (err) {
     console.error('History error:', err);

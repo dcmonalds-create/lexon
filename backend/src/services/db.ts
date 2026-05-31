@@ -1,55 +1,56 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import fs from 'fs';
+import { Pool } from 'pg';
+import type { HistoryItem } from '../../../shared/types';
 
-// DATA_DIR env var → Railway persistent Volume mount (e.g. /data)
-// Fallback to the repo-relative path for local development
-const dataDir = process.env.DATA_DIR || path.join(__dirname, '../../../../data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+});
+
+export async function initDb(): Promise<void> {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS results (
+      id          SERIAL  PRIMARY KEY,
+      telegram_id TEXT    NOT NULL,
+      tool_id     TEXT    NOT NULL,
+      input_summary TEXT,
+      full_result TEXT    NOT NULL,
+      tx_hash     TEXT    NOT NULL,
+      paid_at     INTEGER NOT NULL,
+      created_at  INTEGER DEFAULT EXTRACT(EPOCH FROM NOW())::INTEGER
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_results_tx_hash  ON results(tx_hash);
+    CREATE INDEX        IF NOT EXISTS idx_results_telegram ON results(telegram_id);
+  `);
+  console.log('[db] PostgreSQL connected and schema ready');
 }
-const DB_PATH = path.join(dataDir, 'lexon.db');
-console.log(`[db] SQLite path: ${DB_PATH}`);
 
-const db = new Database(DB_PATH);
-
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS results (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    telegram_id TEXT NOT NULL,
-    tool_id TEXT NOT NULL,
-    input_summary TEXT,
-    full_result TEXT NOT NULL,
-    tx_hash TEXT NOT NULL,
-    paid_at INTEGER NOT NULL,
-    created_at INTEGER DEFAULT (strftime('%s','now'))
+export async function insertResult(params: {
+  telegram_id: string;
+  tool_id: string;
+  input_summary: string;
+  full_result: string;
+  tx_hash: string;
+  paid_at: number;
+}): Promise<void> {
+  await pool.query(
+    `INSERT INTO results (telegram_id, tool_id, input_summary, full_result, tx_hash, paid_at)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (tx_hash) DO NOTHING`,
+    [params.telegram_id, params.tool_id, params.input_summary,
+     params.full_result, params.tx_hash, params.paid_at],
   );
-
-  CREATE INDEX IF NOT EXISTS idx_results_telegram ON results(telegram_id);
-`);
-
-// Add UNIQUE index on tx_hash — guards against duplicate inserts from race conditions.
-// Wrapped in try/catch so it doesn't crash if (unlikely) duplicate data already exists.
-try {
-  db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_results_tx_hash ON results(tx_hash);`);
-} catch (err) {
-  console.warn('Could not create unique index on tx_hash (duplicate data may exist):', err);
 }
 
-export const insertResult = db.prepare(`
-  INSERT INTO results (telegram_id, tool_id, input_summary, full_result, tx_hash, paid_at)
-  VALUES (@telegram_id, @tool_id, @input_summary, @full_result, @tx_hash, @paid_at)
-`);
+export async function getHistory(telegramId: string): Promise<HistoryItem[]> {
+  const { rows } = await pool.query<HistoryItem>(
+    `SELECT id, tool_id, input_summary, full_result, tx_hash, paid_at, created_at
+     FROM results
+     WHERE telegram_id = $1
+     ORDER BY created_at DESC
+     LIMIT 50`,
+    [telegramId],
+  );
+  return rows;
+}
 
-export const getHistory = db.prepare(`
-  SELECT id, tool_id, input_summary, full_result, tx_hash, paid_at, created_at
-  FROM results
-  WHERE telegram_id = ?
-  ORDER BY created_at DESC
-  LIMIT 50
-`);
-
-export default db;
+export default pool;
