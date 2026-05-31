@@ -14,19 +14,11 @@ export const TOOLS: Tool[] = [
     price: 1,
     quiz: [
       {
-        id: 'content_type',
-        question: 'What type of content are you checking?',
-        fieldLabel: 'Content type',
-        type: 'select',
-        options: [
-          'Message or text (Telegram, WhatsApp, SMS)',
-          'Email',
-          'Job offer or recruitment message',
-          'Investment or crypto pitch',
-          'Website or link',
-          'Social media profile or post',
-          'Other',
-        ],
+        id: 'content',
+        question: 'Paste the full message, email, or content you want to check.',
+        fieldLabel: 'Content to analyze',
+        type: 'textarea',
+        placeholder: 'Paste the entire message, email, job offer, investment pitch, or description of the screenshot here. The more complete, the more accurate the verdict.',
         required: true,
       },
       {
@@ -77,14 +69,6 @@ export const TOOLS: Tool[] = [
           'Share my login or password',
           'Nothing specific yet — just feels off',
         ],
-        required: true,
-      },
-      {
-        id: 'content',
-        question: 'Paste the full content to analyze.',
-        fieldLabel: 'Content to analyze',
-        type: 'textarea',
-        placeholder: 'Paste the entire message, email, job offer, or pitch here. The more complete, the more accurate the analysis.',
         required: true,
       },
       {
