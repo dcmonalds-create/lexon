@@ -9,6 +9,7 @@ import { TOKENLEGAL_PROMPT } from '../prompts/tokenlegal';
 import { DOCWIZARD_PROMPT } from '../prompts/docwizard';
 import { TOSCANNER_PROMPT } from '../prompts/toscanner';
 import { LEXDRAFT_PROMPT } from '../prompts/lexdraft';
+import { LEXSCAM_PROMPT } from '../prompts/lexscam';
 
 const client = new Anthropic();
 
@@ -61,6 +62,7 @@ const PROMPT_MAP: Record<string, (input: string) => string> = {
   docwizard: DOCWIZARD_PROMPT,
   toscanner: TOSCANNER_PROMPT,
   lexdraft: LEXDRAFT_PROMPT,
+  lexscam: LEXSCAM_PROMPT,
 };
 
 type SupportedImageType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
