@@ -1,8 +1,14 @@
 [phases.setup]
 nixPkgs = ["nodejs_20", "npm-10_x"]
 
+# Force --include=dev so build-time packages (vite, typescript, @types/*,
+# @vitejs/plugin-react) install even though Railway sets NODE_ENV=production.
 [phases.install]
-cmds = ["npm i && cd frontend && npm install && cd ../backend && npm install --legacy-peer-deps"]
+cmds = [
+  "npm install --include=dev",
+  "cd frontend && npm install --include=dev",
+  "cd backend && npm install --include=dev --legacy-peer-deps",
+]
 
 [phases.build]
 cmds = ["cd frontend && npm run build && cd ../backend && npx tsc"]
