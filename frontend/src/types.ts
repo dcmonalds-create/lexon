@@ -3,6 +3,16 @@ export interface ToolTemplate {
   text: string;
 }
 
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  fieldLabel: string;
+  type: 'select' | 'multiselect' | 'text' | 'textarea';
+  options?: string[];
+  placeholder?: string;
+  required?: boolean; // default true; false = skippable
+}
+
 export interface Tool {
   id: string;
   name: string;
@@ -15,6 +25,7 @@ export interface Tool {
   inputPlaceholder: string;
   price: number;
   templates: ToolTemplate[];
+  quiz?: QuizQuestion[];
 }
 
 export interface AnalyzeRequest {

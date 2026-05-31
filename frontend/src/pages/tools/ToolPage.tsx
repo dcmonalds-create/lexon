@@ -7,6 +7,7 @@ import Paywall from '../../components/Paywall';
 import ResultCard from '../../components/ResultCard';
 import FollowUp from '../../components/FollowUp';
 import Loader from '../../components/Loader';
+import QuizForm from '../../components/QuizForm';
 
 const MAX_FILE_SIZE_MB = 10;
 
@@ -48,6 +49,10 @@ export default function ToolPage() {
 
   const isUrlMode = tool?.inputType === 'url';
   const isDocMode = tool?.id === 'lexdraft';
+  const hasQuiz = !isUrlMode && !!tool?.quiz;
+  const [inputMode, setInputMode] = useState<'guided' | 'manual'>(
+    hasQuiz ? 'guided' : 'manual'
+  );
 
   const newAnalysisLabel = isUrlMode
     ? 'Scan Another Site'
@@ -133,7 +138,16 @@ export default function ToolPage() {
     setFullResult(null);
     setAttachedFile(null);
     setFileError(null);
+    if (hasQuiz) setInputMode('guided');
     reset();
+  };
+
+  const handleQuizComplete = (assembled: string) => {
+    window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('medium');
+    submit({
+      toolId: tool!.id,
+      input: assembled,
+    });
   };
 
   const applyTemplate = (text: string) => {
@@ -184,7 +198,55 @@ export default function ToolPage() {
           lockedLabel={lockedLabel}
         />
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
+
+          {/* Mode toggle (only for non-URL tools with quiz) */}
+          {hasQuiz && (
+            <div className="flex gap-0 bg-gray-100 rounded-xl p-1">
+              <button
+                type="button"
+                onClick={() => setInputMode('guided')}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-colors ${
+                  inputMode === 'guided'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                Guided
+              </button>
+              <button
+                type="button"
+                onClick={() => setInputMode('manual')}
+                className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-colors ${
+                  inputMode === 'manual'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                Manual
+              </button>
+            </div>
+          )}
+
+          {/* Guided quiz mode */}
+          {hasQuiz && inputMode === 'guided' ? (
+            loading ? (
+              <Loader text={isDocMode ? 'Drafting your document…' : 'AI is analyzing your case...'} />
+            ) : (
+              <>
+                {error && <p className="text-xs text-red-500">{error}</p>}
+                <QuizForm
+                  toolColor={tool.color}
+                  questions={tool.quiz!}
+                  onComplete={handleQuizComplete}
+                  onSwitchToManual={() => setInputMode('manual')}
+                />
+              </>
+            )
+          ) : (
+
+          /* Manual / URL form */
+          <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Quick Templates */}
           <div>
@@ -346,6 +408,8 @@ export default function ToolPage() {
             </button>
           )}
         </form>
+          )}
+        </div>
       )}
     </div>
   );
