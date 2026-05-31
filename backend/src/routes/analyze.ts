@@ -55,8 +55,12 @@ function checkAndRecordUserLimit(telegramId: string): { allowed: boolean; retryA
 // ─── Route ─────────────────────────────────────────────────────────────────
 
 router.post('/', async (req: Request, res: Response): Promise<void> => {
-  const { toolId, input, telegramId, fileData, fileType, fileName, languageCode } =
-    req.body as AnalyzeRequest;
+  const {
+    toolId, input, telegramId,
+    fileData, fileType, fileName,
+    fileData2, fileType2, fileName2,
+    languageCode,
+  } = req.body as AnalyzeRequest;
 
   // 1. Validate
   if (!toolId || !input || !telegramId) {
@@ -74,15 +78,20 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  // 3. PDF page cap
-  if (fileData && fileType === 'application/pdf') {
-    const pageCount = countPdfPages(fileData);
+  // 3. PDF page cap — applied to each PDF independently
+  const enforcePdfCap = (data: string | undefined, type: string | undefined, label: string): string | null => {
+    if (!data || type !== 'application/pdf') return null;
+    const pageCount = countPdfPages(data);
     if (pageCount > MAX_PDF_PAGES) {
-      res.status(400).json({
-        error: `PDF has ${pageCount} pages — maximum is ${MAX_PDF_PAGES}. Please upload only the relevant pages.`,
-      });
-      return;
+      return `${label} has ${pageCount} pages — maximum is ${MAX_PDF_PAGES}. Please upload only the relevant pages.`;
     }
+    return null;
+  };
+
+  const pdfErr = enforcePdfCap(fileData, fileType, 'PDF') || enforcePdfCap(fileData2, fileType2, 'Second PDF');
+  if (pdfErr) {
+    res.status(400).json({ error: pdfErr });
+    return;
   }
 
   // 4. ToS Scanner — fetch URL content before calling Claude
@@ -107,7 +116,8 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
   // 5. Run Claude analysis
   try {
     const attachment = fileData && fileType ? { fileData, fileType, fileName } : undefined;
-    const result = await analyzeWithClaude(toolId, analysisInput, attachment, languageCode);
+    const attachment2 = fileData2 && fileType2 ? { fileData: fileData2, fileType: fileType2, fileName: fileName2 } : undefined;
+    const result = await analyzeWithClaude(toolId, analysisInput, attachment, languageCode, attachment2);
 
     const sessionToken = createSession(telegramId, toolId, inputSummary, result.teaser, result.full);
 

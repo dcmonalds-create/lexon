@@ -18,6 +18,10 @@ export interface AnalyzeRequest {
   fileData?: string;
   fileType?: string;
   fileName?: string;
+  // Second attachment — used by dual-file tools like LexCompare (old vs new contract)
+  fileData2?: string;
+  fileType2?: string;
+  fileName2?: string;
   languageCode?: string; // BCP-47 language code from Telegram user (e.g. 'en', 'ro', 'ru')
 }
 

@@ -20,7 +20,7 @@ const PORT = parseInt(process.env.PORT || '3001', 10);
 app.set('trust proxy', 1);
 
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json({ limit: '25mb' }));
+app.use(express.json({ limit: '35mb' }));
 
 // ─── Session (needed for Google OAuth) ────────────────────────────────────────
 app.use(

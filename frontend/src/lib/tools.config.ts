@@ -103,6 +103,38 @@ export const TOOLS: Tool[] = [
     ],
   },
   {
+    id: 'lexcompare',
+    name: 'LexCompare',
+    tagline: 'What changed in this contract?',
+    description: 'Upload two versions of a contract (old vs new). Get a diff that names every change, flags which side it favours, and tells you whether to sign, negotiate, or walk away.',
+    icon: 'GitCompareArrows',
+    color: 'bg-violet-50',
+    inputType: 'textarea',
+    inputLabel: 'Anything you want LexCompare to know (optional)',
+    inputPlaceholder: 'Optional context, e.g. "This is my employment contract renewal — the company says it is just a formal update with no material changes."',
+    price: 2,
+    dualFile: true,
+    dualFileLabels: { first: 'Old / current version', second: 'New / proposed version' },
+    templates: [
+      {
+        label: '📄 Lease renewal',
+        text: 'My landlord sent me a new lease for the renewal. They said the changes are minor. I want to know what is actually different from the version I am currently signed to.',
+      },
+      {
+        label: '💼 Employment contract renewal',
+        text: 'My employer is asking me to sign an updated employment contract. I want to know exactly what changed — pay, notice period, non-compete, IP, anything that affects me.',
+      },
+      {
+        label: '🤝 SaaS / service agreement renewal',
+        text: 'Our vendor sent a renewal of our service agreement. I want to know what changed in pricing, term, auto-renewal, liability, and SLA.',
+      },
+      {
+        label: '🛡️ Insurance policy renewal',
+        text: 'My insurer sent a renewal policy. I want to know what cover, exclusions, excess, or premium structure changed compared to the previous year.',
+      },
+    ],
+  },
+  {
     id: 'signsafe',
     name: 'SignSafe',
     tagline: 'Contract risk scanner',

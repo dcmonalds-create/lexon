@@ -26,6 +26,10 @@ export interface Tool {
   price: number;
   templates: ToolTemplate[];
   quiz?: QuizQuestion[];
+  // Tools that compare two uploaded documents (e.g. LexCompare: old vs new contract).
+  // When true, the input form shows two upload slots and the text field becomes optional context.
+  dualFile?: boolean;
+  dualFileLabels?: { first: string; second: string };
 }
 
 export interface AnalyzeRequest {
@@ -35,6 +39,9 @@ export interface AnalyzeRequest {
   fileData?: string;   // base64 encoded
   fileType?: string;   // MIME type e.g. image/jpeg, application/pdf
   fileName?: string;
+  fileData2?: string;
+  fileType2?: string;
+  fileName2?: string;
   languageCode?: string; // BCP-47 language code from Telegram user (e.g. 'en', 'ro', 'ru')
 }
 

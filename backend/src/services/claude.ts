@@ -11,6 +11,7 @@ import { TOSCANNER_PROMPT } from '../prompts/toscanner';
 import { LEXDRAFT_PROMPT } from '../prompts/lexdraft';
 import { LEXSCAM_PROMPT } from '../prompts/lexscam';
 import { LEXSALARY_PROMPT } from '../prompts/lexsalary';
+import { LEXCOMPARE_PROMPT } from '../prompts/lexcompare';
 
 const client = new Anthropic();
 
@@ -65,6 +66,7 @@ const PROMPT_MAP: Record<string, (input: string) => string> = {
   lexdraft: LEXDRAFT_PROMPT,
   lexscam: LEXSCAM_PROMPT,
   lexsalary: LEXSALARY_PROMPT,
+  lexcompare: LEXCOMPARE_PROMPT,
 };
 
 type SupportedImageType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
@@ -80,7 +82,8 @@ export async function analyzeWithClaude(
   toolId: string,
   input: string,
   attachment?: FileAttachment,
-  languageCode?: string
+  languageCode?: string,
+  attachment2?: FileAttachment
 ): Promise<AnalysisResult> {
   const promptFn = PROMPT_MAP[toolId];
   if (!promptFn) {
@@ -104,9 +107,8 @@ export async function analyzeWithClaude(
 
   const content: ContentBlock[] = [];
 
-  if (attachment) {
-    const { fileData, fileType } = attachment;
-
+  const pushAttachment = (att: FileAttachment) => {
+    const { fileData, fileType } = att;
     if (SUPPORTED_IMAGE_TYPES.includes(fileType as SupportedImageType)) {
       content.push({
         type: 'image',
@@ -126,7 +128,10 @@ export async function analyzeWithClaude(
         },
       });
     }
-  }
+  };
+
+  if (attachment) pushAttachment(attachment);
+  if (attachment2) pushAttachment(attachment2);
 
   content.push({ type: 'text', text: promptText });
 

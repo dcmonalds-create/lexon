@@ -44,12 +44,15 @@ export default function ToolPage() {
   const [input, setInput] = useState('');
   const [fullResult, setFullResult] = useState<string | null>(null);
   const [attachedFile, setAttachedFile] = useState<AttachedFile | null>(null);
+  const [attachedFile2, setAttachedFile2] = useState<AttachedFile | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef2 = useRef<HTMLInputElement>(null);
 
   const isUrlMode = tool?.inputType === 'url';
   const isDocMode = tool?.id === 'lexdraft';
-  const hasQuiz = !isUrlMode && !!tool?.quiz;
+  const isDualFile = tool?.dualFile === true;
+  const hasQuiz = !isUrlMode && !isDualFile && !!tool?.quiz;
   const [inputMode, setInputMode] = useState<'guided' | 'manual'>(
     hasQuiz ? 'guided' : 'manual'
   );
@@ -87,7 +90,7 @@ export default function ToolPage() {
     );
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (slot: 1 | 2) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFileError(null);
     const file = e.target.files?.[0];
     if (!file) return;
@@ -108,7 +111,9 @@ export default function ToolPage() {
       const result = ev.target?.result as string;
       const base64 = result.split(',')[1];
       const preview = file.type.startsWith('image/') ? result : undefined;
-      setAttachedFile({ name: file.name, type: file.type, base64, preview });
+      const attached = { name: file.name, type: file.type, base64, preview };
+      if (slot === 1) setAttachedFile(attached);
+      else setAttachedFile2(attached);
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -119,6 +124,8 @@ export default function ToolPage() {
 
     if (isUrlMode) {
       if (!input.trim() || !isValidUrl(input.trim())) return;
+    } else if (isDualFile) {
+      if (!attachedFile || !attachedFile2) return;
     } else {
       if (!attachedFile && input.trim().length < MIN_CHARS) return;
     }
@@ -126,10 +133,13 @@ export default function ToolPage() {
     window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('medium');
     submit({
       toolId: tool.id,
-      input: input.trim() || '(See attached document)',
+      input: input.trim() || (isDualFile ? '(Comparing two attached documents)' : '(See attached document)'),
       fileData: attachedFile?.base64,
       fileType: attachedFile?.type,
       fileName: attachedFile?.name,
+      fileData2: attachedFile2?.base64,
+      fileType2: attachedFile2?.type,
+      fileName2: attachedFile2?.name,
     });
   };
 
@@ -137,6 +147,7 @@ export default function ToolPage() {
     setInput('');
     setFullResult(null);
     setAttachedFile(null);
+    setAttachedFile2(null);
     setFileError(null);
     if (hasQuiz) setInputMode('guided');
     reset();
@@ -158,6 +169,8 @@ export default function ToolPage() {
   const MIN_CHARS = 20; // require at least 20 characters of real description
   const canSubmit = isUrlMode
     ? input.trim().length > 0 && isValidUrl(input.trim())
+    : isDualFile
+    ? attachedFile !== null && attachedFile2 !== null
     : input.trim().length >= MIN_CHARS || attachedFile !== null;
 
   const domain = isUrlMode && input ? extractDomain(input) : '';
@@ -311,61 +324,127 @@ export default function ToolPage() {
             </div>
           ) : (
             <>
-              {/* File Upload */}
-              <div>
-                <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">
-                  Attach document or photo
-                </p>
+              {/* Hidden file inputs (one per slot) */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+                onChange={handleFileChange(1)}
+                className="hidden"
+              />
+              {isDualFile && (
                 <input
-                  ref={fileInputRef}
+                  ref={fileInputRef2}
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
-                  onChange={handleFileChange}
+                  onChange={handleFileChange(2)}
                   className="hidden"
                 />
+              )}
 
-                {attachedFile ? (
-                  <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3">
-                    {attachedFile.preview ? (
-                      <img src={attachedFile.preview} alt="preview" className="w-10 h-10 rounded-lg object-cover" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
-                        <FileText className="w-5 h-5 text-red-500" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">{attachedFile.name}</p>
-                      <p className="text-xs text-gray-400">
-                        {attachedFile.type.startsWith('image/') ? 'Image' : 'PDF'} · ready to analyze
+              {/* Upload slot(s) */}
+              {isDualFile ? (
+                <div className="space-y-3">
+                  {([
+                    { slot: 1, attached: attachedFile, setAttached: setAttachedFile, ref: fileInputRef, label: tool.dualFileLabels?.first ?? 'First document' },
+                    { slot: 2, attached: attachedFile2, setAttached: setAttachedFile2, ref: fileInputRef2, label: tool.dualFileLabels?.second ?? 'Second document' },
+                  ] as const).map(({ slot, attached, setAttached, ref, label }) => (
+                    <div key={slot}>
+                      <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">
+                        {label}
                       </p>
+                      {attached ? (
+                        <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3">
+                          {attached.preview ? (
+                            <img src={attached.preview} alt="preview" className="w-10 h-10 rounded-lg object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-violet-50 flex items-center justify-center">
+                              <FileText className="w-5 h-5 text-violet-500" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-800 truncate">{attached.name}</p>
+                            <p className="text-xs text-gray-400">
+                              {attached.type.startsWith('image/') ? 'Image' : 'PDF'} · ready
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setAttached(null)}
+                            className="p-1 rounded-lg hover:bg-gray-100"
+                          >
+                            <X className="w-4 h-4 text-gray-400" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => ref.current?.click()}
+                          className="w-full flex items-center gap-3 border-2 border-dashed border-gray-200 rounded-xl px-4 py-3 hover:border-violet-400 hover:bg-violet-50/50 transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                            <Paperclip className="w-4 h-4 text-gray-400" />
+                          </div>
+                          <div className="text-left">
+                            <p className="text-sm font-medium text-gray-700">Upload PDF or image</p>
+                            <p className="text-xs text-gray-400">JPG, PNG, PDF · max 10MB</p>
+                          </div>
+                          <Image className="w-4 h-4 text-gray-300 ml-auto" />
+                        </button>
+                      )}
                     </div>
+                  ))}
+                  {fileError && <p className="text-xs text-red-500 mt-1">{fileError}</p>}
+                </div>
+              ) : (
+                <div>
+                  <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">
+                    Attach document or photo
+                  </p>
+
+                  {attachedFile ? (
+                    <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3">
+                      {attachedFile.preview ? (
+                        <img src={attachedFile.preview} alt="preview" className="w-10 h-10 rounded-lg object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-red-500" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 truncate">{attachedFile.name}</p>
+                        <p className="text-xs text-gray-400">
+                          {attachedFile.type.startsWith('image/') ? 'Image' : 'PDF'} · ready to analyze
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setAttachedFile(null)}
+                        className="p-1 rounded-lg hover:bg-gray-100"
+                      >
+                        <X className="w-4 h-4 text-gray-400" />
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       type="button"
-                      onClick={() => setAttachedFile(null)}
-                      className="p-1 rounded-lg hover:bg-gray-100"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full flex items-center gap-3 border-2 border-dashed border-gray-200 rounded-xl px-4 py-3 hover:border-emerald-400 hover:bg-emerald-50/50 transition-colors"
                     >
-                      <X className="w-4 h-4 text-gray-400" />
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+                        <Paperclip className="w-4 h-4 text-gray-400" />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm font-medium text-gray-700">Upload file</p>
+                        <p className="text-xs text-gray-400">JPG, PNG, PDF · max 10MB</p>
+                      </div>
+                      <Image className="w-4 h-4 text-gray-300 ml-auto" />
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full flex items-center gap-3 border-2 border-dashed border-gray-200 rounded-xl px-4 py-3 hover:border-emerald-400 hover:bg-emerald-50/50 transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                      <Paperclip className="w-4 h-4 text-gray-400" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm font-medium text-gray-700">Upload file</p>
-                      <p className="text-xs text-gray-400">JPG, PNG, PDF · max 10MB</p>
-                    </div>
-                    <Image className="w-4 h-4 text-gray-300 ml-auto" />
-                  </button>
-                )}
+                  )}
 
-                {fileError && <p className="text-xs text-red-500 mt-1">{fileError}</p>}
-              </div>
+                  {fileError && <p className="text-xs text-red-500 mt-1">{fileError}</p>}
+                </div>
+              )}
 
               {/* Text Input */}
               <div>
@@ -373,7 +452,7 @@ export default function ToolPage() {
                   <label className="block text-sm font-medium text-gray-700">
                     {tool.inputLabel}
                   </label>
-                  {!attachedFile && input.trim().length > 0 && input.trim().length < MIN_CHARS && (
+                  {!isDualFile && !attachedFile && input.trim().length > 0 && input.trim().length < MIN_CHARS && (
                     <span className="text-[11px] text-amber-500 font-medium">
                       {MIN_CHARS - input.trim().length} more chars needed
                     </span>
@@ -383,7 +462,7 @@ export default function ToolPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={tool.inputPlaceholder}
-                  rows={5}
+                  rows={isDualFile ? 3 : 5}
                   className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
                 />
               </div>
@@ -393,7 +472,7 @@ export default function ToolPage() {
           {error && <p className="text-xs text-red-500">{error}</p>}
 
           {loading ? (
-            <Loader text={isUrlMode ? 'Fetching & analyzing terms…' : isDocMode ? 'Drafting your document…' : 'AI is analyzing your case...'} />
+            <Loader text={isUrlMode ? 'Fetching & analyzing terms…' : isDocMode ? 'Drafting your document…' : isDualFile ? 'Comparing both versions…' : 'AI is analyzing your case...'} />
           ) : (
             <button
               type="submit"
@@ -401,10 +480,12 @@ export default function ToolPage() {
               className={`w-full disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-2xl transition-colors text-sm ${
                 isUrlMode
                   ? 'bg-indigo-600 hover:bg-indigo-700'
+                  : isDualFile
+                  ? 'bg-violet-600 hover:bg-violet-700'
                   : 'bg-[#1D4035] hover:bg-[#164030]'
               }`}
             >
-              {isUrlMode ? 'Scan Terms of Service' : isDocMode ? 'Generate Document' : 'Analyze'}
+              {isUrlMode ? 'Scan Terms of Service' : isDocMode ? 'Generate Document' : isDualFile ? 'Compare Both Versions' : 'Analyze'}
             </button>
           )}
         </form>

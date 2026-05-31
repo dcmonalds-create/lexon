@@ -9,6 +9,9 @@ interface SubmitOptions {
   fileData?: string;
   fileType?: string;
   fileName?: string;
+  fileData2?: string;
+  fileType2?: string;
+  fileName2?: string;
 }
 
 export function useToolSubmit() {
@@ -18,7 +21,11 @@ export function useToolSubmit() {
   const telegramId = useUserStore((s) => s.telegramId);
   const languageCode = useUserStore((s) => s.languageCode);
 
-  const submit = async ({ toolId, input, fileData, fileType, fileName }: SubmitOptions) => {
+  const submit = async ({
+    toolId, input,
+    fileData, fileType, fileName,
+    fileData2, fileType2, fileName2,
+  }: SubmitOptions) => {
     setLoading(true);
     setError(null);
     setResult(null);
@@ -31,6 +38,9 @@ export function useToolSubmit() {
         fileData,
         fileType,
         fileName,
+        fileData2,
+        fileType2,
+        fileName2,
         languageCode,
       });
       setResult(res);
