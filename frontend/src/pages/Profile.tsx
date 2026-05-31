@@ -13,6 +13,7 @@ export default function Profile() {
   const { firstName, lastName, username, telegramId, setUser } = useUserStore();
   const { connected, address } = useWalletStore();
   const setPhantomConnected = usePhantomStore((s) => s.setConnected);
+  const clearHistory = useHistoryStore((s) => s.clearItems);
   const [signingOut, setSigningOut] = useState(false);
 
   const handleSignOut = async () => {
@@ -27,6 +28,7 @@ export default function Profile() {
       await (window as any).phantom?.solana?.disconnect();
     } catch { /* ignore */ }
     setPhantomConnected(false, '');
+    clearHistory();
     // Clear user state — triggers WebSignIn overlay
     setUser({
       telegramId: '',

@@ -2,13 +2,14 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
-// In compiled output __dirname = dist/backend/src/services/
-// data/ is at backend/data/
-const dataDir = path.join(__dirname, '../../../../data');
+// DATA_DIR env var → Railway persistent Volume mount (e.g. /data)
+// Fallback to the repo-relative path for local development
+const dataDir = process.env.DATA_DIR || path.join(__dirname, '../../../../data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 const DB_PATH = path.join(dataDir, 'lexon.db');
+console.log(`[db] SQLite path: ${DB_PATH}`);
 
 const db = new Database(DB_PATH);
 

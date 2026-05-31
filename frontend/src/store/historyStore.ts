@@ -7,6 +7,7 @@ interface HistoryState {
   setItems: (items: HistoryItem[]) => void;
   addItem: (item: HistoryItem) => void;
   setLoading: (loading: boolean) => void;
+  clearItems: () => void;
 }
 
 export const useHistoryStore = create<HistoryState>((set) => ({
@@ -15,4 +16,5 @@ export const useHistoryStore = create<HistoryState>((set) => ({
   setItems: (items) => set({ items }),
   addItem: (item) => set((state) => ({ items: [item, ...state.items] })),
   setLoading: (loading) => set({ loading }),
+  clearItems: () => set({ items: [] }),
 }));
