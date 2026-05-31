@@ -6,24 +6,17 @@ export default function Home() {
     <div>
       {/* Editorial masthead */}
       <div className="mb-7 rule-above">
-        <p
-          className="font-mono text-[10px] uppercase tracking-[0.22em]"
-          style={{ color: 'var(--ink-3)' }}
-        >
-          Issue No. 01 · Legal Counsel
-        </p>
         <h1
-          className="font-display text-[44px] leading-[0.95] mt-1.5"
+          className="font-display text-[34px] leading-[1.05]"
           style={{ color: 'var(--ink)' }}
         >
-          What do you<br />
-          <span className="italic" style={{ color: 'var(--accent)' }}>need to know?</span>
+          AI-powered <span className="italic" style={{ color: 'var(--accent)' }}>legal super-app.</span>
         </h1>
         <p
-          className="text-[13.5px] mt-3 max-w-[28ch]"
+          className="text-[14px] leading-relaxed mt-4"
           style={{ color: 'var(--ink-2)' }}
         >
-          One USDT for the answer a lawyer would give you for two hundred.
+          Scan contracts, dispute fines, know your rental rights, check employment law, force refunds, get crypto tax guidance, and decode government forms.
         </p>
       </div>
 

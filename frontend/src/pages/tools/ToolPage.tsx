@@ -186,10 +186,25 @@ export default function ToolPage() {
         Back
       </button>
 
-      <div className={`${tool.color} rounded-2xl p-5 mb-4`}>
-        <h2 className="text-lg font-bold text-gray-900">{tool.name}</h2>
-        <p className="text-xs text-gray-500 mt-1">{tool.tagline}</p>
-        <p className="text-sm text-gray-600 mt-2">{tool.description}</p>
+      <div className="mb-5 rule-above">
+        <p
+          className="font-mono text-[10px] uppercase tracking-[0.18em]"
+          style={{ color: 'var(--ink-3)' }}
+        >
+          {tool.tagline}
+        </p>
+        <h2
+          className="font-display text-[32px] leading-[1.05] mt-1.5"
+          style={{ color: 'var(--ink)' }}
+        >
+          {tool.name}
+        </h2>
+        <p
+          className="text-sm leading-relaxed mt-3"
+          style={{ color: 'var(--ink-2)' }}
+        >
+          {tool.description}
+        </p>
       </div>
 
       {fullResult ? (
