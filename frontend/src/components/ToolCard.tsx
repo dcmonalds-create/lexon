@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import {
   FileText, AlertTriangle, Home, Briefcase, Receipt, Coins, ScrollText, Link, PenLine,
-  ShieldAlert, BadgeDollarSign, GitCompareArrows, FileWarning,
+  ShieldAlert, BadgeDollarSign, GitCompareArrows, FileWarning, FileCheck2, Unlock, Wallet, KeyRound,
 } from 'lucide-react';
 import type { Tool } from '../types';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string; strokeWidth?: number }>> = {
   FileText, AlertTriangle, Home, Briefcase, Receipt, Coins, ScrollText, Link, PenLine,
-  ShieldAlert, BadgeDollarSign, GitCompareArrows, FileWarning,
+  ShieldAlert, BadgeDollarSign, GitCompareArrows, FileWarning, FileCheck2, Unlock, Wallet, KeyRound,
 };
 
 export default function ToolCard({ tool }: { tool: Tool }) {
