@@ -89,7 +89,8 @@ export default function ResultCard({ toolName, fullResult, timestamp, resultLabe
 
       {/* ─── Ruling body ───────────────────────────────────────────────── */}
       <div
-        className="px-6 py-5
+        className="prose-lexon
+                   px-6 py-5
                    prose prose-sm max-w-none
                    prose-headings:font-display
                    prose-h1:text-[24px] prose-h1:leading-tight prose-h1:mt-6 prose-h1:mb-3
@@ -99,25 +100,6 @@ export default function ResultCard({ toolName, fullResult, timestamp, resultLabe
                    prose-strong:font-semibold
                    prose-code:font-mono prose-code:text-[12px]
                    prose-blockquote:border-l-2"
-        style={{
-          color: 'var(--ink-2)',
-          // Prose CSS variables (Tailwind Typography v4)
-          '--tw-prose-body':       'var(--ink-2)',
-          '--tw-prose-headings':   'var(--ink)',
-          '--tw-prose-lead':       'var(--ink-2)',
-          '--tw-prose-links':      'var(--accent)',
-          '--tw-prose-bold':       'var(--ink)',
-          '--tw-prose-counters':   'var(--ink-3)',
-          '--tw-prose-bullets':    'var(--rule)',
-          '--tw-prose-hr':         'var(--rule-soft)',
-          '--tw-prose-quotes':     'var(--ink)',
-          '--tw-prose-quote-borders': 'var(--accent)',
-          '--tw-prose-code':       'var(--ink)',
-          '--tw-prose-pre-code':   'var(--ink)',
-          '--tw-prose-pre-bg':     'var(--paper-2)',
-          '--tw-prose-th-borders': 'var(--rule)',
-          '--tw-prose-td-borders': 'var(--rule-soft)',
-        } as React.CSSProperties}
       >
         <ReactMarkdown>{fullResult}</ReactMarkdown>
       </div>
