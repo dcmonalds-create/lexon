@@ -159,6 +159,9 @@ export default function ToolPage() {
     submit({
       toolId: tool!.id,
       input: assembled,
+      fileData: attachedFile?.base64,
+      fileType: attachedFile?.type,
+      fileName: attachedFile?.name,
     });
   };
 
@@ -264,6 +267,102 @@ export default function ToolPage() {
             </div>
           )}
 
+          {/* Shared single-file upload — available in BOTH Guided and Manual.
+              URL tools (ToScan) take a URL and dual-file tools (LexCompare)
+              render their own pair of slots inside the manual form. */}
+          {!isUrlMode && !isDualFile && (
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+                onChange={handleFileChange(1)}
+                className="hidden"
+              />
+              <p
+                className="font-mono text-[10px] uppercase tracking-[0.18em] mb-2"
+                style={{ color: 'var(--ink-3)' }}
+              >
+                Attach document or photo <span className="normal-case tracking-normal">(optional)</span>
+              </p>
+
+              {attachedFile ? (
+                <div
+                  className="flex items-center gap-3 px-4 py-3"
+                  style={{
+                    background: 'var(--paper-2)',
+                    border: '1px solid var(--rule-soft)',
+                    borderRadius: '12px',
+                  }}
+                >
+                  {attachedFile.preview ? (
+                    <img src={attachedFile.preview} alt="preview" className="w-10 h-10 rounded-lg object-cover" />
+                  ) : (
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: 'var(--accent-soft)' }}
+                    >
+                      <FileText className="w-5 h-5" style={{ color: 'var(--accent)' }} strokeWidth={1.7} />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--ink)' }}>
+                      {attachedFile.name}
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--ink-3)' }}>
+                      {attachedFile.type.startsWith('image/') ? 'Image' : 'PDF'} · ready to analyze
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAttachedFile(null)}
+                    className="p-1 rounded-lg transition-colors"
+                    style={{ color: 'var(--ink-3)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--paper-3)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center gap-3 px-4 py-3 transition-colors"
+                  style={{
+                    border: '2px dashed var(--rule)',
+                    borderRadius: '12px',
+                    background: 'transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--accent)';
+                    e.currentTarget.style.background = 'var(--accent-soft)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--rule)';
+                    e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: 'var(--paper-2)' }}
+                  >
+                    <Paperclip className="w-4 h-4" style={{ color: 'var(--ink-3)' }} strokeWidth={1.7} />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium" style={{ color: 'var(--ink)' }}>Upload file</p>
+                    <p className="text-xs" style={{ color: 'var(--ink-3)' }}>JPG, PNG, PDF · max 10MB</p>
+                  </div>
+                  <Image className="w-4 h-4 ml-auto" style={{ color: 'var(--ink-3)' }} strokeWidth={1.7} />
+                </button>
+              )}
+
+              {fileError && (
+                <p className="text-xs mt-1" style={{ color: 'var(--verdict-danger)' }}>{fileError}</p>
+              )}
+            </div>
+          )}
+
           {/* Guided quiz mode */}
           {hasQuiz && inputMode === 'guided' ? (
             loading ? (
@@ -347,14 +446,9 @@ export default function ToolPage() {
             </div>
           ) : (
             <>
-              {/* Hidden file inputs (one per slot) */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
-                onChange={handleFileChange(1)}
-                className="hidden"
-              />
+              {/* Dual-file tools (LexCompare) render their two upload slots
+                  here; the single-file slot used by every other tool lives in
+                  the shared parent so it appears in Guided mode too. */}
               {isDualFile && (
                 <input
                   ref={fileInputRef2}
@@ -365,8 +459,7 @@ export default function ToolPage() {
                 />
               )}
 
-              {/* Upload slot(s) */}
-              {isDualFile ? (
+              {isDualFile && (
                 <div className="space-y-3">
                   {([
                     { slot: 1, attached: attachedFile, setAttached: setAttachedFile, ref: fileInputRef, label: tool.dualFileLabels?.first ?? 'First document' },
@@ -417,54 +510,6 @@ export default function ToolPage() {
                       )}
                     </div>
                   ))}
-                  {fileError && <p className="text-xs text-red-500 mt-1">{fileError}</p>}
-                </div>
-              ) : (
-                <div>
-                  <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">
-                    Attach document or photo
-                  </p>
-
-                  {attachedFile ? (
-                    <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3">
-                      {attachedFile.preview ? (
-                        <img src={attachedFile.preview} alt="preview" className="w-10 h-10 rounded-lg object-cover" />
-                      ) : (
-                        <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
-                          <FileText className="w-5 h-5 text-red-500" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800 truncate">{attachedFile.name}</p>
-                        <p className="text-xs text-gray-400">
-                          {attachedFile.type.startsWith('image/') ? 'Image' : 'PDF'} · ready to analyze
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setAttachedFile(null)}
-                        className="p-1 rounded-lg hover:bg-gray-100"
-                      >
-                        <X className="w-4 h-4 text-gray-400" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="w-full flex items-center gap-3 border-2 border-dashed border-gray-200 rounded-xl px-4 py-3 hover:border-emerald-400 hover:bg-emerald-50/50 transition-colors"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                        <Paperclip className="w-4 h-4 text-gray-400" />
-                      </div>
-                      <div className="text-left">
-                        <p className="text-sm font-medium text-gray-700">Upload file</p>
-                        <p className="text-xs text-gray-400">JPG, PNG, PDF · max 10MB</p>
-                      </div>
-                      <Image className="w-4 h-4 text-gray-300 ml-auto" />
-                    </button>
-                  )}
-
                   {fileError && <p className="text-xs text-red-500 mt-1">{fileError}</p>}
                 </div>
               )}
