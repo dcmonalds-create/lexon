@@ -1,6 +1,24 @@
 import { Pool } from 'pg';
 import type { HistoryItem } from '../../../shared/types';
 
+if (!process.env.DATABASE_URL) {
+  // Without this we silently default to localhost:5432 and the connection
+  // attempt buries the real cause under a 200-line ECONNREFUSED aggregate.
+  // Surface the misconfiguration explicitly and stop before pg defaults kick in.
+  console.error('');
+  console.error('═══════════════════════════════════════════════════════════════');
+  console.error('  [db] DATABASE_URL is not set.');
+  console.error('');
+  console.error('  Railway: open the web service → Variables → add');
+  console.error('    DATABASE_URL = ${{Postgres.DATABASE_URL}}');
+  console.error('  (replace "Postgres" with your actual Postgres service name).');
+  console.error('');
+  console.error('  Local dev: add DATABASE_URL=postgres://... to backend/.env');
+  console.error('═══════════════════════════════════════════════════════════════');
+  console.error('');
+  process.exit(1);
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
