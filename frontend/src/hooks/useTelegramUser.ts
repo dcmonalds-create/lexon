@@ -29,6 +29,7 @@ declare global {
           notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
         };
         openLink: (url: string) => void;
+        openTelegramLink: (url: string) => void;
         themeParams: Record<string, string>;
       };
     };
