@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import session from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
 import passport from 'passport';
 import rateLimit from 'express-rate-limit';
 import analyzeRouter from './routes/analyze';
@@ -12,7 +13,7 @@ import followUpRouter from './routes/followup';
 import solanaUnlockRouter from './routes/solana-unlock';
 import authRouter from './routes/auth';
 import remindersRouter from './routes/reminders';
-import { initDb } from './services/db';
+import pool, { initDb } from './services/db';
 import { startReminderScheduler } from './services/reminderScheduler';
 
 const app = express();
@@ -25,8 +26,17 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '35mb' }));
 
 // ─── Session (needed for Google OAuth) ────────────────────────────────────────
+// Postgres-backed store: survives redeploys, no MemoryStore leak warning,
+// scales beyond a single process. Reuses the existing pg pool.
+const PgSession = connectPgSimple(session);
 app.use(
   session({
+    store: new PgSession({
+      pool,
+      tableName: 'user_sessions',
+      createTableIfMissing: true,
+      pruneSessionInterval: 60 * 15, // sweep expired rows every 15 min
+    }),
     secret: process.env.SESSION_SECRET || 'lexon-dev-secret-change-in-prod',
     resave: false,
     saveUninitialized: false,
