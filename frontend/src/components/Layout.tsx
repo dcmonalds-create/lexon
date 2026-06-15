@@ -82,6 +82,35 @@ export default function Layout() {
         <div className="max-w-md mx-auto lex-enter-soft" key={location.pathname}>
           <Outlet />
         </div>
+
+        {/* ─── Footer ──────────────────────────────────────────────────── */}
+        <footer
+          className="max-w-md mx-auto mt-10 pt-5 flex items-center justify-between"
+          style={{ borderTop: '1px solid var(--rule-soft)' }}
+        >
+          <span
+            className="font-mono text-[10px] uppercase tracking-[0.18em]"
+            style={{ color: 'var(--ink-3)' }}
+          >
+            LexOn
+          </span>
+          <a
+            href="https://x.com/LexOnLegal"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              window.Telegram?.WebApp?.openLink?.('https://x.com/LexOnLegal');
+              window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light');
+            }}
+            className="font-mono text-[10px] uppercase tracking-[0.18em] transition-colors"
+            style={{ color: 'var(--ink-3)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--ink-3)')}
+            aria-label="LexOn on X"
+          >
+            Follow @LexOnLegal →
+          </a>
+        </footer>
       </main>
 
       {/* ─── Bottom nav ────────────────────────────────────────────────── */}
