@@ -3,6 +3,7 @@ import { Scale, Clock, User, Sun, Moon } from 'lucide-react';
 import WalletButton from './WalletButton';
 import PhantomButton from './PhantomButton';
 import WebSignIn from './WebSignIn';
+import Onboarding from './Onboarding';
 import { useUserStore } from '../store/userStore';
 import { useThemeStore } from '../store/themeStore';
 
@@ -24,6 +25,9 @@ export default function Layout() {
   return (
     <div className="flex flex-col min-h-screen">
       {!isTelegram && needsSignIn && <WebSignIn />}
+
+      {/* First-three-opens onboarding — only after sign-in gate clears */}
+      {(isTelegram || !needsSignIn) && <Onboarding />}
 
       {/* ─── Header ────────────────────────────────────────────────────── */}
       <header
